@@ -1,0 +1,22 @@
+{
+  "name": "red-rxjs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "node-red": {
+    "nodes": {
+      "rx-observable": "rx-observable/rx-observable.js"
+    }
+  },
+  "dependencies": {
+    "rxjs": "^6.5.2"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0"
+  }
+}

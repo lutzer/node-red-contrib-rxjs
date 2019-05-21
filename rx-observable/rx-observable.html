@@ -1,0 +1,17 @@
+<script type="text/javascript">
+    RED.nodes.registerType('rx-observable',{
+        category: 'rxjs',
+        color: '#b3f442',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs:1,
+        outputs:2,
+        icon: "file.png",
+        label: function() {
+            return this.name || "rx-observable";
+        },
+        inputLabels: "next",
+        outputLabels: ["pipe", "tap"], 
+    });
+</script>
