@@ -1,0 +1,34 @@
+<script type="text/x-red" data-template-name="rx range">
+    <div class="form-row">
+        <label for="node-input-from">From</label>
+        <input type="number" id="node-input-from">
+    </div>
+    <div class="form-row">
+        <label for="node-input-to">To</label>
+        <input type="number" id="node-input-to">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('rx range',{
+        category: 'rxjs',
+        color: '#b3f442',
+        defaults: {
+            name: { value: "" },
+            from: { value: 0 },
+            to: { value: 10 }
+        },
+        inputs:1,
+        outputs:1,
+        icon: "file.png",
+        label: function() {
+            return this.name || "rx range";
+        },
+        inputLabels: [ "subscribe" ],
+        outputLabels: [ "next" ]
+    });
+</script>

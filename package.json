@@ -1,5 +1,5 @@
 {
-  "name": "red-rxjs",
+  "name": "node-red-contrib-rxjs",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,7 +10,8 @@
   "license": "ISC",
   "node-red": {
     "nodes": {
-      "rx-observable": "rx-observable/rx-observable.js"
+      "rx interval": "nodes/rx-interval.js",
+      "rx range": "nodes/rx-range.js"
     }
   },
   "dependencies": {
