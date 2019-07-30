@@ -1,5 +1,6 @@
 const { range } = require('rxjs');
-const { unsubscribe } = require('./utils.js');
+const { tap } = require('rxjs/operators');
+//const { unsubscribe } = require('./utils.js');
 
 module.exports = function (RED) {
 	function RxIntervalNode (config) {
@@ -7,22 +8,30 @@ module.exports = function (RED) {
 
 		var node = this;
         var context = this.context();
+        var global = context.global
 
-        context.source = range(config.from, config.to);
+        var observableName = "observable." + node.id;
 
-        node.on('input', function (msg) {
-			if (msg.topic === 'subscribe') {
-                unsubscribe(context.subsciption);
-                context.subsciption = context.source.subscribe( (val) => { 
-                    node.send({ topic: "next", payload: val }) 
-                });
-            } else if (msg.topic === "unsubscribe") {
-                unsubscribe(context.subsciption);
-            }
-        });
+        var observable = range(config.from, config.to).pipe( tap( (val) => {
+            console.log("tap: "+val)
+            node.send([ null, { topic: "next", payload: val } ] ) 
+        }))
+
+        global.set(observableName, observable);
+
+        //console.log(observable);
+
+        setTimeout( () => {
+            node.send([{
+                topic: "pipe",
+                payload: {
+                    observable: observableName
+                }
+            }, null]);
+        },1);
 
 		node.on('close', function () {
-			context.subscription.unsubscribe();
+			global.set(node.id, undefined);
 		});
 	}
 	RED.nodes.registerType("rx range", RxIntervalNode);
