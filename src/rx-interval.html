@@ -17,13 +17,13 @@
             name: { value: "" },
             period: { value: 1000 }
         },
-        inputs:1,
-        outputs:1,
+        inputs:0,
+        outputs:2,
         icon: "file.png",
         label: function() {
             return this.name || "rx interval";
         },
-        inputLabels: [ "subscribe" ]  ,
-        outputLabels: [ "next" ]
+        inputLabels: [ ]  ,
+        outputLabels: [ "observable", "tap" ]
     });
 </script>

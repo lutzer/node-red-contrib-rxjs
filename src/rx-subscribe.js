@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const { interval } = require('rxjs');
 const { unsubscribe } = require('./common.js');
 
@@ -12,21 +13,32 @@ module.exports = function (RED) {
         node.on('input', function (msg) {
 			if (msg.topic === 'pipe') {
                 unsubscribe(context.subsciption);
-                var observable = global.get(msg.payload.observable);
-                context.subsciption = observable.subscribe({
-                    next(msg) { 
+                try {
+                    context.observable = global.get(msg.payload.observable);
+                } catch (err) {
+                    node.error("Cannot read piped observable", err);
+                    return;
+                }
+            } else if (msg.topic === "subscribe") {
+                if (!_.isObject(context.observable)) {
+                    node.error("No observable has been piped yet", new Error("No observable has been piped yet"));
+                    return;
+                }
+                unsubscribe(context.subscription);
+                context.subscription = context.observable.subscribe({
+                    next : (msg) => { 
                         node.send([msg, null]) 
                     },
-                    completed() {
+                    complete : () => {
                         node.send([null, { topic: "completed" }]) 
                     },
-                    error(err) {
+                    error : (err) => {
                         node.error(err.message, err);
                     }
 
                 });
             } else if (msg.topic === "unsubscribe") {
-                unsubscribe(context.subsciption);
+                unsubscribe(context.subscription);
             }
         });
 

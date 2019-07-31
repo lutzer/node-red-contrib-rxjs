@@ -10,12 +10,13 @@
   "license": "ISC",
   "node-red": {
     "nodes": {
-      "rx interval": "nodes/rx-interval.js",
-      "rx range": "nodes/rx-range.js",
-      "rx subscribe": "nodes/rx-subscribe.js"
+      "rx interval": "src/rx-interval.js",
+      "rx range": "src/rx-range.js",
+      "rx subscribe": "src/rx-subscribe.js"
     }
   },
   "dependencies": {
+    "lodash": "^4.17.15",
     "rxjs": "^6.5.2"
   },
   "devDependencies": {
