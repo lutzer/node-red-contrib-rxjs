@@ -1,6 +1,6 @@
 const { range } = require('rxjs');
-const { tap } = require('rxjs/operators');
-//const { unsubscribe } = require('./utils.js');
+const { tap, map } = require('rxjs/operators');
+const { ON_LOADED_TIMEOUT } = require('./common.js');
 
 module.exports = function (RED) {
 	function RxIntervalNode (config) {
@@ -8,27 +8,30 @@ module.exports = function (RED) {
 
 		var node = this;
         var context = this.context();
-        var global = context.global
+        var global = context.global;
 
         var observableName = "observable." + node.id;
 
-        var observable = range(config.from, config.to).pipe( tap( (val) => {
-            console.log("tap: "+val)
-            node.send([ null, { topic: "next", payload: val } ] ) 
-        }))
+        var observable = range(config.from, config.to).pipe( 
+            map( (val) => {
+                return { topic: "range", payload: val }
+            }), tap( (msg) => {
+                node.send([ null, msg ] ) 
+            })
+        )
 
         global.set(observableName, observable);
 
-        //console.log(observable);
-
-        setTimeout( () => {
+        function onLoaded() {
             node.send([{
                 topic: "pipe",
                 payload: {
                     observable: observableName
                 }
             }, null]);
-        },1);
+        }
+
+        setTimeout( () => onLoaded() ,ON_LOADED_TIMEOUT);
 
 		node.on('close', function () {
 			global.set(node.id, undefined);

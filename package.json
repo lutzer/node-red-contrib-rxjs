@@ -11,7 +11,8 @@
   "node-red": {
     "nodes": {
       "rx interval": "nodes/rx-interval.js",
-      "rx range": "nodes/rx-range.js"
+      "rx range": "nodes/rx-range.js",
+      "rx subscribe": "nodes/rx-subscribe.js"
     }
   },
   "dependencies": {

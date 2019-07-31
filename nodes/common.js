@@ -4,5 +4,7 @@ module.exports = {
             subscription.unsubscribe();
 
         subscription = undefined;
-    }
+    },
+
+    ON_LOADED_TIMEOUT : 10
 }

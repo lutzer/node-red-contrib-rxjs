@@ -1,5 +1,5 @@
 const { interval } = require('rxjs');
-const { unsubscribe } = require('./utils.js');
+const { unsubscribe } = require('./common.js');
 
 module.exports = function (RED) {
 	function RxIntervalNode (config) {
@@ -14,7 +14,7 @@ module.exports = function (RED) {
 			if (msg.topic === 'subscribe') {
                 unsubscribe(context.subsciption);
                 context.subsciption = context.source.subscribe( (val) => { 
-                    node.send({ topic: "next", payload: val }) 
+                    node.send({ topic: "interval", payload: val }) 
                 });
             } else if (msg.topic === "unsubscribe") {
                 unsubscribe(context.subsciption);
