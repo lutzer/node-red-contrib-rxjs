@@ -1,6 +1,5 @@
-const { range } = require('rxjs');
 const { take, tap } = require('rxjs/operators');
-const { ON_LOADED_TIMEOUT, NodeRedObservable } = require('./common.js');
+const { NodeRedObservable } = require('./common.js');
 
 module.exports = function (RED) {
 	function RxIntervalNode (config) {
