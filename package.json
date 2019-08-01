@@ -12,7 +12,9 @@
     "nodes": {
       "rx interval": "src/rx-interval.js",
       "rx range": "src/rx-range.js",
-      "rx subscribe": "src/rx-subscribe.js"
+      "rx subscribe": "src/rx-subscriber.js",
+      "rx subject": "src/rx-subject.js",
+      "rx take": "src/rx-take.js"
     }
   },
   "dependencies": {

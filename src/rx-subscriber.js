@@ -1,5 +1,6 @@
 const _ = require('lodash');
-const { interval } = require('rxjs');
+const { interval, Subject } = require('rxjs');
+const { takeUntil } = require('rxjs/operators');
 const { unsubscribe } = require('./common.js');
 
 module.exports = function (RED) {
@@ -10,9 +11,11 @@ module.exports = function (RED) {
         var context = this.context();
         var global = context.global;
 
+        var $completeSubject = new Subject()
+
         node.on('input', function (msg) {
 			if (msg.topic === 'pipe') {
-                unsubscribe(context.subsciption);
+                unsubscribe(context.subscription);
                 try {
                     context.observable = global.get(msg.payload.observable);
                 } catch (err) {
@@ -25,7 +28,7 @@ module.exports = function (RED) {
                     return;
                 }
                 unsubscribe(context.subscription);
-                context.subscription = context.observable.subscribe({
+                context.subscription = context.observable.pipe( takeUntil($completeSubject) ).subscribe({
                     next : (msg) => { 
                         node.send([msg, null]) 
                     },
@@ -39,6 +42,8 @@ module.exports = function (RED) {
                 });
             } else if (msg.topic === "unsubscribe") {
                 unsubscribe(context.subscription);
+            } else if (msg.topic === "complete") {
+                $completeSubject.next();
             }
         });
 
@@ -46,5 +51,5 @@ module.exports = function (RED) {
 			context.subscription.unsubscribe();
 		});
 	}
-	RED.nodes.registerType("rx subscribe", RxIntervalNode);
+	RED.nodes.registerType("rx subscriber", RxIntervalNode);
 };

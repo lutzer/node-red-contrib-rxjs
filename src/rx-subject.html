@@ -1,0 +1,25 @@
+<script type="text/x-red" data-template-name="rx subject">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('rx subject',{
+        category: 'rxjs',
+        color: '#b3f442',
+        defaults: {
+            name: { value: "" },
+            period: { value: 1000 }
+        },
+        inputs:1,
+        outputs:2,
+        icon: "file.png",
+        label: function() {
+            return this.name || "rx subject";
+        },
+        inputLabels: [ "next" ] ,
+        outputLabels: [ "observable", "tap" ]
+    });
+</script>

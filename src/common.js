@@ -5,8 +5,8 @@ class NodeRedObservable {
         this.observableName = "observable." + node.id;
     }
 
-    register(observable) {
-        this.globalContext.set(this.observableName, observable);
+    register($observable) {
+        this.globalContext.set(this.observableName, $observable);
     }
 
     get pipeMessage() {
