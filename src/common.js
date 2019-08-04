@@ -5,15 +5,26 @@ class NodeRedObservable {
         this.observableName = "observable." + node.id;
     }
 
-    register($observable) {
+    register($observable, multipart = 0) {
         this.globalContext.set(this.observableName, $observable);
+        this.multipart = multipart;
     }
 
     get pipeMessage() {
         return {
             topic: "pipe",
             payload: {
-                observable : this.observableName
+                observable : this.observableName,
+                multipart : this.multipart
+            }
+        }
+    }
+
+    get returnMessage() {
+        return {
+            topic: "returns",
+            payload: {
+                observable: this.observableName
             }
         }
     }

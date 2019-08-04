@@ -4,6 +4,10 @@
         <input type="number" id="node-input-period">
     </div>
     <div class="form-row">
+        <label for="node-input-returns">Returns</label>
+        <input type="checkbox" id="node-input-returns">
+    </div>
+    <div class="form-row">
         <label for="node-input-name">Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
@@ -15,7 +19,8 @@
         color: '#b3f442',
         defaults: {
             name: { value: "" },
-            period: { value: 1000 }
+            period: { value: 1000 },
+            returns: { value: false}
         },
         inputs:0,
         outputs:2,
