@@ -13,6 +13,25 @@ module.exports = function (RED) {
 
         var $completeSubject = new Subject()
 
+        function showState(state) {
+            switch (state) {
+                case "init":
+                    node.status({ fill: "red", shape: "ring", text: "not piped"});
+                    break;
+                case "piped":
+                    node.status({ fill: "yellow", shape: "dot", text: "not subscribed"});
+                    break;
+                case "subscribed":
+                    node.status({ fill: "green", shape: "dot", text: "subscribed"});
+                    break;
+                case "completed":
+                    node.status({ fill: "blue", shape: "dot", text: "completed"});
+                    break;
+            }
+        }
+
+        showState("init");
+
         node.on('input', function (msg) {
 			if (msg.topic === 'pipe') {
                 unsubscribe(context.subscription);
@@ -22,18 +41,21 @@ module.exports = function (RED) {
                     node.error("Cannot read piped observable", err);
                     return;
                 }
+                showState("piped");
             } else if (msg.topic === "subscribe") {
                 if (!_.isObject(context.observable)) {
                     node.error("No observable has been piped yet", new Error("No observable has been piped yet"));
                     return;
                 }
                 unsubscribe(context.subscription);
+
+                showState("subscribed");
                 context.subscription = context.observable.pipe( takeUntil($completeSubject) ).subscribe({
                     next : (msg) => { 
                         node.send([msg, null]) 
                     },
                     complete : () => {
-                        node.send([null, { topic: "completed" }]) 
+                        showState("completed");
                     },
                     error : (err) => {
                         node.error(err.message, err);
@@ -42,6 +64,8 @@ module.exports = function (RED) {
                 });
             } else if (msg.topic === "unsubscribe") {
                 unsubscribe(context.subscription);
+                if (_.isObject(context.observable))
+                    showState("piped");
             } else if (msg.topic === "complete") {
                 $completeSubject.next();
             }
