@@ -21,7 +21,7 @@ module.exports = function (RED) {
         })
 
         function onLoaded() {
-            node.send([observableWrapper.pipeMessage, null]);
+            node.send([observableWrapper.pipeMessage]);
         }
 
         setTimeout( () => onLoaded() ,ON_LOADED_TIMEOUT);

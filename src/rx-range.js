@@ -10,12 +10,14 @@ module.exports = function (RED) {
         
         var observableWrapper = new NodeRedObservable(node);
 
+        observableWrapper.on('tap', (msg) => {
+            node.send([null, msg]);
+        });
+
         observableWrapper.register(
             range(config.from, config.to).pipe( 
                 map( (val) => {
                     return { topic: "range", payload: val }
-                }), tap( (msg) => {
-                    node.send([ null, msg ] ) 
                 })
             )
         );

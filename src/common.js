@@ -1,12 +1,18 @@
+const EventEmitter = require('events');
+const { tap } = require('rxjs/operators');
 
-class NodeRedObservable {
+class NodeRedObservable extends EventEmitter {
     constructor(node) {
+        super();
         this.globalContext = node.context().global;
         this.observableName = "observable." + node.id;
     }
 
     register($observable, multipart = 0) {
-        this.globalContext.set(this.observableName, $observable);
+        const $withTap = $observable.pipe( tap( (val) => {
+            this.emit('tap', val);
+        }));
+        this.globalContext.set(this.observableName, $withTap);
         this.multipart = multipart;
     }
 
@@ -30,6 +36,7 @@ class NodeRedObservable {
     }
 
     remove() {
+        this.removeAllListeners("tap");
         this.globalContext.set(this.observableName, undefined);
     }
 }

@@ -49,14 +49,14 @@
         defaults: {
             name: { value: "" },
             take_count: { value: 1 },
-            filter_func : { value : "return msg.payload != undefined"},
+            filter_func : { value : "payload != undefined"},
             operatorType : { value: "none" }
         },
         inputs:1,
         outputs:2,
         icon: "file.png",
         label: function() {
-            return this.name || this.operatorType !== "none" ? `rx ${this.operatorType}` : "rx operator";
+            return this.name || `rx ${this.operatorType === "none" ? "operator" : this.operatorType}`;
         },
         inputLabels: [ "input" ],
         outputLabels: [ "pipe", "tap" ],
@@ -73,7 +73,9 @@
 
             showDetailView(this.operatorType);
 
-            $('#node-input-filter_func').typedInput({types:['jsonata']});
+            $('#node-input-filter_func').typedInput({
+                types:['jsonata']
+            });
         },
         oneditsave: function () {
             var type = $('#node-input-operatorType').val();
