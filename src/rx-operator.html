@@ -1,0 +1,84 @@
+<style>
+    .red-ui-typedInput-input {
+        left:32px !important;
+    }
+</style>
+
+<script type="text/x-red" data-template-name="rx operator">
+    <div class="form-row">
+        <label for="node-input-operatorType">Operator</label>
+        <select id="node-input-operatorType" style="width:270px !important">
+            <option value="none" disabled selected>Select operator</option>
+            <option value="take">take</option>
+            <option value="takeUntil">takeUntil</option>
+            <option value="filter">filter</option>
+        </select>
+    </div>
+
+    <div class="detail-view" id="take">
+        <div class="form-row">
+            <label for="node-input-take_count">Count</label>
+            <input type="number" id="node-input-take_count" placeholder="Number of values before completing">
+        </div>
+    </div>
+
+    <div class="detail-view" id="takeUntil">
+        <div class="form-row">
+            <label>Input</label>
+            <span>Needs to receive an observable with topic <i>until</i>.</span>
+        </div>
+    </div>
+
+    <div class="detail-view" id="filter">
+        <div class="form-row">
+            <label for="node-input-filter_func">Expression</label>
+            <input type="text" id="node-input-filter_func" style="width: 60%" placeholder="Function for filtering messages.">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('rx operator',{
+        category: 'rxjs',
+        color: '#b3f442',
+        defaults: {
+            name: { value: "" },
+            take_count: { value: 1 },
+            filter_func : { value : "return msg.payload != undefined"},
+            operatorType : { value: "none" }
+        },
+        inputs:1,
+        outputs:2,
+        icon: "file.png",
+        label: function() {
+            return this.name || this.operatorType !== "none" ? `rx ${this.operatorType}` : "rx operator";
+        },
+        inputLabels: [ "input" ],
+        outputLabels: [ "pipe", "tap" ],
+        oneditprepare: function () {
+
+            function showDetailView(operatorType) {
+                $(".detail-view").hide();
+                $('.detail-view#' + operatorType).show()
+            }
+
+            $('#node-input-operatorType').on('change', function (val) {
+                showDetailView(this.value);
+            })
+
+            showDetailView(this.operatorType);
+
+            $('#node-input-filter_func').typedInput({types:['jsonata']});
+        },
+        oneditsave: function () {
+            var type = $('#node-input-operatorType').val();
+            this.operatorType = type || "none";
+            console.log(this);
+        }
+    });
+</script>

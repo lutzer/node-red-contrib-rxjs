@@ -14,8 +14,7 @@
       "rx range": "src/rx-range.js",
       "rx subscribe": "src/rx-subscriber.js",
       "rx subject": "src/rx-subject.js",
-      "rx take": "src/rx-take.js",
-      "rx takeUntil": "src/rx-takeUntil.js"
+      "rx operator": "src/rx-operator.js"
     }
   },
   "dependencies": {
