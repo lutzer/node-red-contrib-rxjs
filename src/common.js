@@ -34,7 +34,6 @@ class NodeRedObservable {
     }
 }
 
-
 module.exports = {
     unsubscribe : function(subscription) {
         if (subscription !== undefined) 

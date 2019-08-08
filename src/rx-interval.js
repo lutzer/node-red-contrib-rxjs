@@ -3,7 +3,7 @@ const { tap, map } = require('rxjs/operators');
 const { ON_LOADED_TIMEOUT, NodeRedObservable } = require('./common.js');
 
 module.exports = function (RED) {
-	function RxIntervalNode (config) {
+	function RxNode (config) {
 		RED.nodes.createNode(this, config);
 
         var node = this;
@@ -30,5 +30,5 @@ module.exports = function (RED) {
 			observableWrapper.remove();
 		});
 	}
-	RED.nodes.registerType("rx interval", RxIntervalNode);
+	RED.nodes.registerType("rx interval", RxNode);
 };

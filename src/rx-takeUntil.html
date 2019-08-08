@@ -1,4 +1,4 @@
-<script type="text/x-red" data-template-name="rx take">
+<script type="text/x-red" data-template-name="rx takeUntil">
     <div class="form-row">
         <label for="node-input-count">Count</label>
         <input type="number" id="node-input-count">
@@ -10,7 +10,7 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('rx take',{
+    RED.nodes.registerType('rx takeUntil',{
         category: 'rxjs',
         color: '#b3f442',
         defaults: {
@@ -21,7 +21,7 @@
         outputs:2,
         icon: "file.png",
         label: function() {
-            return this.name || "rx take";
+            return this.name || "rx takeUntil";
         },
         inputLabels: [ "input" ],
         outputLabels: [ "pipe", "tap" ]

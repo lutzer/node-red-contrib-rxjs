@@ -4,7 +4,7 @@ const { takeUntil } = require('rxjs/operators');
 const { unsubscribe } = require('./common.js');
 
 module.exports = function (RED) {
-	function RxIntervalNode (config) {
+	function RxNode (config) {
 		RED.nodes.createNode(this, config);
 
 		var node = this;
@@ -59,6 +59,7 @@ module.exports = function (RED) {
                     complete : () => {
                         showState("completed");
                         node.send([null, { topic: "completed" }]) 
+                        console.log("completed");
                     },
                     error : (err) => {
                         showState("error");
@@ -79,5 +80,5 @@ module.exports = function (RED) {
 			context.subscription.unsubscribe();
 		});
 	}
-	RED.nodes.registerType("rx subscriber", RxIntervalNode);
+	RED.nodes.registerType("rx subscriber", RxNode);
 };
