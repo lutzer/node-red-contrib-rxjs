@@ -58,8 +58,7 @@ module.exports = function (RED) {
                     },
                     complete : () => {
                         showState("completed");
-                        node.send([null, { topic: "completed" }]) 
-                        console.log("completed");
+                        node.send([null, { topic: "completed" }])
                     },
                     error : (err) => {
                         showState("error");

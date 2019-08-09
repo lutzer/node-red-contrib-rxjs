@@ -39,7 +39,7 @@ module.exports = function (RED) {
             switch (config.operatorType) {
                 case "take":
                     if (msg.topic === 'pipe') {
-                        var $observable = globalContext.get(msg.payload.observable)
+                        const $observable = globalContext.get(msg.payload.observable)
                         observableWrapper.register(
                             $observable.pipe(
                                 take(config.take_count)
@@ -69,18 +69,12 @@ module.exports = function (RED) {
                     break;
                 case "filter":
                     if (msg.topic === 'pipe') {
-                        var $observable = globalContext.get(msg.payload.observable)
+                        const $observable = globalContext.get(msg.payload.observable)
+                        const filterFunc = new Function('msg', config.filter_func);
                         observableWrapper.register(
                             $observable.pipe(
                                 filter( (msg) => {
-                                    var payload = msg.payload;
-                                    var topic = msg.topic;
-                                    try {
-                                        return eval(config.filter_func)
-                                    } catch (err) {
-                                        node.error("Could not evaluate expression: " + err, msg);
-                                        return false;
-                                    }
+                                    return filterFunc(msg);
                                 })
                             )
                         )

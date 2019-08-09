@@ -49,7 +49,7 @@
         defaults: {
             name: { value: "" },
             take_count: { value: 1 },
-            filter_func : { value : "payload != undefined"},
+            filter_func : { value : "return msg.payload > 0"},
             operatorType : { value: "none" }
         },
         inputs:1,
@@ -74,7 +74,13 @@
             showDetailView(this.operatorType);
 
             $('#node-input-filter_func').typedInput({
-                types:['jsonata']
+                types:[
+                    {
+                        value:"function",
+                        label:"func",
+                        icon:"red/images/typedInput/expr.png"
+                    }
+                ]
             });
         },
         oneditsave: function () {
