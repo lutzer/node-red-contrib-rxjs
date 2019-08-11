@@ -1,5 +1,5 @@
-const { interval } = require('rxjs');
-const { tap, map } = require('rxjs/operators');
+const { timer } = require('rxjs');
+const { map } = require('rxjs/operators');
 const { ON_LOADED_TIMEOUT, NodeRedObservable } = require('./common.js');
 
 module.exports = function (RED) {
@@ -15,9 +15,9 @@ module.exports = function (RED) {
         });
 
         observableWrapper.register(
-            interval(config.period).pipe( 
+            timer(config.initialDelay, config.period > 0 ? config.period : undefined).pipe( 
                 map( (val) => {
-                    return { topic: "interval", payload: val }
+                    return { topic: "timer", payload: val }
                 })
             )
         );
@@ -32,5 +32,5 @@ module.exports = function (RED) {
 			observableWrapper.remove();
 		});
 	}
-	RED.nodes.registerType("rx interval", RxNode);
+	RED.nodes.registerType("rx timer", RxNode);
 };

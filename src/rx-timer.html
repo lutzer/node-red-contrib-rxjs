@@ -1,11 +1,11 @@
-<script type="text/x-red" data-template-name="rx interval">
+<script type="text/x-red" data-template-name="rx timer">
     <div class="form-row">
-        <label for="node-input-period">Period (ms)</label>
-        <input type="number" id="node-input-period">
+        <label for="node-input-initialDelay">Initial delay (ms)</label>
+        <input type="number" id="node-input-initialDelay">
     </div>
     <div class="form-row">
-        <label for="node-input-returns">Returns</label>
-        <input type="checkbox" id="node-input-returns">
+        <label for="node-input-period">Repeat after (ms)</label>
+        <input type="number" id="node-input-period">
     </div>
     <div class="form-row">
         <label for="node-input-name">Name</label>
@@ -14,19 +14,19 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('rx interval',{
+    RED.nodes.registerType('rx timer',{
         category: 'rxjs',
         color: '#b3f442',
         defaults: {
             name: { value: "" },
-            period: { value: 1000 },
-            returns: { value: false}
+            initialDelay : { value: 1000 },
+            period: { value: 0 }
         },
         inputs:0,
         outputs:2,
         icon: "file.png",
         label: function() {
-            return this.name || "rx interval";
+            return this.name || "rx timer";
         },
         inputLabels: [ ]  ,
         outputLabels: [ "pipe", "tap" ]

@@ -10,11 +10,12 @@
   "license": "ISC",
   "node-red": {
     "nodes": {
-      "rx interval": "src/rx-interval.js",
+      "rx timer": "src/rx-timer.js",
       "rx range": "src/rx-range.js",
       "rx subscribe": "src/rx-subscriber.js",
       "rx fromMsg": "src/rx-fromMsg.js",
-      "rx operator": "src/rx-operator.js"
+      "rx operator": "src/rx-operator.js",
+      "rx combine": "src/rx-combine.js"
     }
   },
   "dependencies": {

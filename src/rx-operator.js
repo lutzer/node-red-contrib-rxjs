@@ -50,7 +50,7 @@ module.exports = function (RED) {
                                 take(config.take_count)
                             )
                         )
-                        node.send([observableWrapper.pipeMessage, null]);
+                        sendPipeMessage();
                         showState("piped");
                     }
                     break;

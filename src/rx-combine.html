@@ -1,0 +1,29 @@
+<script type="text/x-red" data-template-name="rx combine">
+    <div class="form-row">
+        <label for="node-input-numberOfInputs">Number of Observables</label>
+        <input type="number" id="node-input-numberOfInputs">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('rx combine',{
+        category: 'rxjs',
+        color: '#b3f442',
+        defaults: {
+            name: { value: "" },
+            numberOfInputs : { value: 2, required: true }
+        },
+        inputs:1,
+        outputs:2,
+        icon: "file.png",
+        label: function() {
+            return this.name || "rx combine";
+        },
+        inputLabels: [ "input" ]  ,
+        outputLabels: [ "pipe", "tap" ]
+    });
+</script>
