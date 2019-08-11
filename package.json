@@ -13,7 +13,7 @@
       "rx interval": "src/rx-interval.js",
       "rx range": "src/rx-range.js",
       "rx subscribe": "src/rx-subscriber.js",
-      "rx subject": "src/rx-subject.js",
+      "rx fromMsg": "src/rx-fromMsg.js",
       "rx operator": "src/rx-operator.js"
     }
   },

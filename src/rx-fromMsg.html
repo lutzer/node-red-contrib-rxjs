@@ -1,4 +1,4 @@
-<script type="text/x-red" data-template-name="rx subject">
+<script type="text/x-red" data-template-name="rx fromMsg">
     <div class="form-row">
         <label for="node-input-name">Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -6,7 +6,7 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('rx subject',{
+    RED.nodes.registerType('rx fromMsg',{
         category: 'rxjs',
         color: '#b3f442',
         defaults: {
@@ -17,7 +17,7 @@
         outputs:1,
         icon: "file.png",
         label: function() {
-            return this.name || "rx subject";
+            return this.name || "rx fromMsg";
         },
         inputLabels: [ "next" ] ,
         outputLabels: [ "pipe" ]

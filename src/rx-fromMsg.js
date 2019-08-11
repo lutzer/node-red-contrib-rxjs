@@ -30,5 +30,5 @@ module.exports = function (RED) {
 			observableWrapper.remove();
 		});
 	}
-	RED.nodes.registerType("rx subject", RxNode);
+	RED.nodes.registerType("rx fromMsg", RxNode);
 };
