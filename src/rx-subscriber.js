@@ -30,6 +30,23 @@ module.exports = function (RED) {
             }
         }
 
+        function subscribe() {
+            showState("subscribed");
+            context.subscription = context.observable.pipe( takeUntil($completeSubject) ).subscribe({
+                next : (msg) => { 
+                    node.send([msg, null]) 
+                },
+                complete : () => {
+                    showState("completed");
+                    node.send([null, { topic: "completed" }])
+                },
+                error : (err) => {
+                    node.error(err.message, err);
+                }
+
+            });
+        }
+
         showState("init");
 
         node.on('input', function (msg) {
@@ -42,27 +59,16 @@ module.exports = function (RED) {
                     return;
                 }
                 showState("piped");
+                // automatically subscribe if checked
+                if (config.auto_subscribe)
+                    subscribe();
             } else if (msg.topic === "subscribe") {
                 if (!_.isObject(context.observable)) {
                     node.error("No observable has been piped yet", new Error("No observable has been piped yet"));
                     return;
                 }
                 unsubscribe(context.subscription);
-
-                showState("subscribed");
-                context.subscription = context.observable.pipe( takeUntil($completeSubject) ).subscribe({
-                    next : (msg) => { 
-                        node.send([msg, null]) 
-                    },
-                    complete : () => {
-                        showState("completed");
-                        node.send([null, { topic: "completed" }])
-                    },
-                    error : (err) => {
-                        node.error(err.message, err);
-                    }
-
-                });
+                subscribe();
             } else if (msg.topic === "unsubscribe") {
                 unsubscribe(context.subscription);
                 if (_.isObject(context.observable))

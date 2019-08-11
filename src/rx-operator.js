@@ -1,4 +1,4 @@
-const { take, takeUntil, filter, scan, map } = require('rxjs/operators');
+const { take, takeUntil, filter, scan, map, timeInterval } = require('rxjs/operators');
 const { NodeRedObservable, evalFunc } = require('./common.js');
 const _ = require('lodash');
 
@@ -102,6 +102,23 @@ module.exports = function (RED) {
                                         return val;
                                     else
                                         return { payload : val }
+                                })
+                            )
+                        )
+                        sendPipeMessage()
+                        showState("piped");
+                    }
+                    break;
+                case "timeInterval":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        observableWrapper.register(
+                            $observable.pipe(
+                                timeInterval(),
+                                map( (val) => {
+                                    const msg = val.value;
+                                    msg.interval = val.interval;
+                                    return msg;
                                 })
                             )
                         )

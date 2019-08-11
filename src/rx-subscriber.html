@@ -1,5 +1,10 @@
 <script type="text/x-red" data-template-name="rx subscriber">
     <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-auto_subscribe" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-auto_subscribe" style="width: 70%;">Auto subscribe</label>
+        </div>
+    <div class="form-row">
         <label for="node-input-name">Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
@@ -10,7 +15,8 @@
         category: 'rxjs',
         color: '#b3f442',
         defaults: {
-            name: { value: "" }
+            name: { value: "" },
+            auto_subscribe : { value: true }
         },
         inputs:1,
         outputs:2,
