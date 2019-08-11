@@ -14,6 +14,8 @@ class NodeRedObservable extends EventEmitter {
         }));
         this.globalContext.set(this.observableName, $withTap);
         this.multipart = multipart;
+
+
     }
 
     get pipeMessage() {
@@ -47,6 +49,10 @@ module.exports = {
             subscription.unsubscribe();
 
         subscription = undefined;
+    },
+
+    evalFunc : function(obj) {
+        return Function('"use strict";return (' + obj + ')')();
     },
 
     NodeRedObservable : NodeRedObservable,

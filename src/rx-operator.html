@@ -12,6 +12,7 @@
             <option value="take">take</option>
             <option value="takeUntil">takeUntil</option>
             <option value="filter">filter</option>
+            <option value="scan">scan</option>
         </select>
     </div>
 
@@ -36,6 +37,17 @@
         </div>
     </div>
 
+    <div class="detail-view" id="scan">
+        <div class="form-row">
+            <label for="node-input-scan_seed">Initial Seed</label>
+            <input type="text" id="node-input-scan_seed" style="width: 60%" placeholder="Start Value">
+        </div>
+        <div class="form-row">
+            <label for="node-input-scan_func">Expression</label>
+            <input type="text" id="node-input-scan_func" style="width: 60%" placeholder="Reducer function">
+        </div>
+    </div>
+
     <div class="form-row">
         <label for="node-input-name">Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -43,6 +55,15 @@
 </script>
 
 <script type="text/javascript">
+
+    const inputTypes = {
+        function : {
+            value:"function",
+            label:"func",
+            icon:"red/images/typedInput/expr.png"
+        }
+    };
+
     RED.nodes.registerType('rx operator',{
         category: 'rxjs',
         color: '#b3f442',
@@ -50,6 +71,8 @@
             name: { value: "" },
             take_count: { value: 1 },
             filter_func : { value : "return msg.payload > 0"},
+            scan_seed : { value: 0 },
+            scan_func : { value : "return acc + msg.payload" },
             operatorType : { value: "none" }
         },
         inputs:1,
@@ -73,20 +96,14 @@
 
             showDetailView(this.operatorType);
 
-            $('#node-input-filter_func').typedInput({
-                types:[
-                    {
-                        value:"function",
-                        label:"func",
-                        icon:"red/images/typedInput/expr.png"
-                    }
-                ]
-            });
+            $('#node-input-filter_func').typedInput({ types:[ inputTypes.function ]});
+
+            $('#node-input-scan_seed').typedInput({ types:[ inputTypes.function ]});
+            $('#node-input-scan_func').typedInput({ types:[ inputTypes.function ]});
         },
         oneditsave: function () {
             var type = $('#node-input-operatorType').val();
             this.operatorType = type || "none";
-            console.log(this);
         }
     });
 </script>

@@ -1,5 +1,6 @@
-const { take, takeUntil, filter, tap } = require('rxjs/operators');
-const { NodeRedObservable } = require('./common.js');
+const { take, takeUntil, filter, scan, map } = require('rxjs/operators');
+const { NodeRedObservable, evalFunc } = require('./common.js');
+const _ = require('lodash');
 
 module.exports = function (RED) {
 	function RxNode (config) {
@@ -24,16 +25,20 @@ module.exports = function (RED) {
             }
         }
 
-        if (config.operatorType === "none") 
-            showState('no-operator');
-        else
-            showState("no-pipe");
-
         var observableWrapper = new NodeRedObservable(node);
 
         observableWrapper.on('tap', (msg) => {
             node.send([null, msg]);
         });
+
+        function sendPipeMessage() {
+            node.send([observableWrapper.pipeMessage, null]);
+        }
+
+        if (config.operatorType === "none") 
+            showState('no-operator');
+        else
+            showState("no-pipe");
 
         node.on('input', function (msg) {
             switch (config.operatorType) {
@@ -64,7 +69,7 @@ module.exports = function (RED) {
                                 takeUntil(node.$untilObservable)
                             )
                         )
-                        node.send([observableWrapper.pipeMessage, null]);
+                        sendPipeMessage()
                     }
                     break;
                 case "filter":
@@ -78,7 +83,29 @@ module.exports = function (RED) {
                                 })
                             )
                         )
-                        node.send([observableWrapper.pipeMessage, null]);
+                        sendPipeMessage()
+                        showState("piped");
+                    }
+                    break;
+                case "scan":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        const scanFunc = new Function('acc', 'msg', config.scan_func);
+                        const scanSeed = evalFunc(config.scan_seed);
+                        observableWrapper.register(
+                            $observable.pipe(
+                                scan( (acc, msg) => {
+                                    return scanFunc(acc, msg);
+                                }, scanSeed),
+                                map( (val) => {
+                                    if (_.has(val, 'payload'))
+                                        return val;
+                                    else
+                                        return { payload : val }
+                                })
+                            )
+                        )
+                        sendPipeMessage()
                         showState("piped");
                     }
                     break;

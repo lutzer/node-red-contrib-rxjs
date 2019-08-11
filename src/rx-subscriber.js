@@ -27,8 +27,6 @@ module.exports = function (RED) {
                 case "completed":
                     node.status({ fill: "blue", shape: "dot", text: "completed"});
                     break;
-                case "error":
-                    node.error({ fill: "red", shape: "dot", text: "error"})
             }
         }
 
@@ -61,7 +59,6 @@ module.exports = function (RED) {
                         node.send([null, { topic: "completed" }])
                     },
                     error : (err) => {
-                        showState("error");
                         node.error(err.message, err);
                     }
 
