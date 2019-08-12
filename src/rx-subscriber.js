@@ -33,8 +33,13 @@ module.exports = function (RED) {
         function subscribe() {
             showState("subscribed");
             context.subscription = context.observable.pipe( takeUntil($completeSubject) ).subscribe({
-                next : (msg) => { 
-                    node.send([msg, null])
+                next : (msg) => {
+                    if (_.isArray(msg) && config.bundle) {
+                        var bundle = msg.map( (val) => val.payload );
+                        node.send([{ topic: msg[0].topic, payload: bundle }])
+                    } else {
+                        node.send([msg, null])
+                    }
                 },
                 complete : () => {
                     showState("completed");

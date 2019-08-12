@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const EventEmitter = require('events');
 const { tap } = require('rxjs/operators');
 
@@ -53,6 +54,20 @@ module.exports = {
 
     evalFunc : function(obj) {
         return Function('"use strict";return (' + obj + ')')();
+    },
+
+    convertNodeRedType : function(val, type) {
+        switch (type) {
+            case 'json':
+                return JSON.parse(val);
+            case 'num':
+                return _.toNumber(val);
+            case 'str':
+                return _.toString(val);
+            default:
+                return val;
+                
+        }
     },
 
     NodeRedObservable : NodeRedObservable,

@@ -1,4 +1,4 @@
-const { combineLatest, concat, merge } = require('rxjs');
+const { combineLatest, concat, merge, race, zip } = require('rxjs');
 const { NodeRedObservable } = require('./common.js');
 const _ = require('lodash');
 
@@ -71,6 +71,16 @@ module.exports = function (RED) {
                                 merge(...inputObservables)
                             )
                             break;
+                        case "race":
+                            observableWrapper.register(
+                                race(...inputObservables)
+                            )
+                            break;
+                        case "zip":
+                            observableWrapper.register(
+                                zip(...inputObservables)
+                            )
+                            break;  
                         default:
                             showState("no-operator");
                     }
