@@ -34,7 +34,7 @@ module.exports = function (RED) {
             showState("subscribed");
             context.subscription = context.observable.pipe( takeUntil($completeSubject) ).subscribe({
                 next : (msg) => { 
-                    node.send([msg, null]) 
+                    node.send([msg, null])
                 },
                 complete : () => {
                     showState("completed");

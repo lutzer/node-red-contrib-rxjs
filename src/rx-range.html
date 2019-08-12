@@ -19,8 +19,8 @@
         color: '#b3f442',
         defaults: {
             name: { value: "" },
-            from: { value: 0 },
-            to: { value: 10 }
+            from: { value: 0, required: true, validate:RED.validators.number() },
+            to: { value: 10, required: true, validate:RED.validators.number() }
         },
         inputs:0,
         outputs:2,

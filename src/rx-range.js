@@ -1,10 +1,15 @@
+const _ = require('lodash');
 const { range } = require('rxjs');
-const { tap, map } = require('rxjs/operators');
+const { map } = require('rxjs/operators');
 const { ON_LOADED_TIMEOUT, NodeRedObservable } = require('./common.js');
 
 module.exports = function (RED) {
 	function RxNode (config) {
-		RED.nodes.createNode(this, config);
+        RED.nodes.createNode(this, config);
+        
+        //convert properties
+        config.from = _.toNumber(config.from)
+        config.to = _.toNumber(config.to)
 
         var node = this;
         

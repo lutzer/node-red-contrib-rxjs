@@ -1,10 +1,15 @@
 const { timer } = require('rxjs');
 const { map } = require('rxjs/operators');
 const { ON_LOADED_TIMEOUT, NodeRedObservable } = require('./common.js');
+const _ = require('lodash');
 
 module.exports = function (RED) {
 	function RxNode (config) {
-		RED.nodes.createNode(this, config);
+        RED.nodes.createNode(this, config);
+        
+        //convert properties
+        config.period = _.toNumber(config.period)
+        config.initialDelay = _.toNumber(config.initialDelay)
 
         var node = this;
         

@@ -1,11 +1,14 @@
-const { combineLatest } = require('rxjs');
-const { ON_LOADED_TIMEOUT, NodeRedObservable } = require('./common.js');
+const { combineLatest, concat, merge } = require('rxjs');
+const { NodeRedObservable } = require('./common.js');
 const _ = require('lodash');
 
 module.exports = function (RED) {
 	function RxNode (config) {
         RED.nodes.createNode(this, config);
         
+        // convert argument types
+        config.numberOfInputs = _.toNumber(config.numberOfInputs);
+
         function showState(state) {
             switch (state) {
                 case "ready":
@@ -28,7 +31,7 @@ module.exports = function (RED) {
             node.send([null, msg]);
         });
 
-        var inputObservables = Array(config.numberOfInputs);
+        var inputObservables = _.fill(Array(config.numberOfInputs), null);
 
         showState("no-argument");
 
@@ -45,18 +48,37 @@ module.exports = function (RED) {
                 }
                 inputObservables[part] = globalContext.get(msg.payload.observable);
 
-                console.log(inputObservables.length, inputObservables)
+                //console.log(inputObservables.length, inputObservables)
                 const isComplete = inputObservables.reduce( (acc, val) => {
-                    return acc && (val !== null);
+                    return acc && _.isObject(val);
                 }, true);
 
                 if (isComplete) {
-                    observableWrapper.register(
-                        combineLatest(inputObservables)
-                    )
                     showState("ready");
+                    switch (config.operatorType) {
+                        case "combineLatest":
+                            observableWrapper.register(
+                                combineLatest(inputObservables)
+                            )
+                            break;
+                        case "concat":
+                            observableWrapper.register(
+                                concat(inputObservables)
+                            )
+                            break;
+                        case "merge":
+                            observableWrapper.register(
+                                merge(inputObservables)
+                            )
+                            break;
+                        default:
+                            showState("no-operator");
+                    }
+                    
                     node.send([observableWrapper.pipeMessage, null])
-                }
+                } else {
+                    showState("no-argument");
+                } 
                 
             }
         })

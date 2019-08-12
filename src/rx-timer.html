@@ -19,8 +19,8 @@
         color: '#b3f442',
         defaults: {
             name: { value: "" },
-            initialDelay : { value: 1000 },
-            period: { value: 0 }
+            initialDelay : { value: 1000, required: true, validate:RED.validators.number() },
+            period: { value: 0, required: true, validate:RED.validators.number() }
         },
         inputs:0,
         outputs:2,

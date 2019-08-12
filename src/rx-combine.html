@@ -1,5 +1,14 @@
 <script type="text/x-red" data-template-name="rx combine">
     <div class="form-row">
+        <label for="node-input-operatorType">Operator</label>
+        <select id="node-input-operatorType" style="width:270px !important">
+            <option value="none" disabled selected>Select operator</option>
+            <option value="combineLatest">combineLatest</option>
+            <option value="concat">concat</option>
+            <option value="merge">merge</option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-numberOfInputs">Number of Observables</label>
         <input type="number" id="node-input-numberOfInputs">
     </div>
@@ -15,15 +24,20 @@
         color: '#b3f442',
         defaults: {
             name: { value: "" },
-            numberOfInputs : { value: 2, required: true }
+            numberOfInputs : { value: 2, required: true, validate:RED.validators.number() },
+            operatorType : { value: "none" }
         },
         inputs:1,
         outputs:2,
         icon: "file.png",
         label: function() {
-            return this.name || "rx combine";
+            return this.name || `rx ${this.operatorType === "none" ? "operator" : this.operatorType}`;
         },
         inputLabels: [ "input" ]  ,
-        outputLabels: [ "pipe", "tap" ]
+        outputLabels: [ "pipe", "tap" ],
+        oneditsave: function () {
+            var type = $('#node-input-operatorType').val();
+            this.operatorType = type || "none";
+        }
     });
 </script>
