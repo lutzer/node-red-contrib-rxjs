@@ -9,13 +9,26 @@
         <label for="node-input-operatorType">Operator</label>
         <select id="node-input-operatorType" style="width:270px !important">
             <option value="none" disabled selected>Select operator</option>
+            <option value="bufferCount">bufferCount</option>
+            <option value="filter">filter</option>
             <option value="mapTo">mapTo</option>
             <option value="take">take</option>
             <option value="takeUntil">takeUntil</option>
             <option value="timeInterval">timeInterval</option>
-            <option value="filter">filter</option>
             <option value="scan">scan</option>
+            <option value="skip">skip</option>
         </select>
+    </div>
+
+    <div class="detail-view" id="bufferCount">
+        <div class="form-row">
+            <label for="node-input-bufferCount_bufferSize">Buffer Count</label>
+            <input type="number" id="node-input-bufferCount_bufferSize" placeholder="Number of values to buffer">
+        </div>
+        <div class="form-row">
+            <label for="node-input-bufferCount_startEvery">Start Every</label>
+            <input type="number" id="node-input-bufferCount_startEvery" placeholder="Start new buffer every">
+        </div>
     </div>
 
     <div class="detail-view" id="mapTo">
@@ -62,6 +75,13 @@
         </div>
     </div>
 
+    <div class="detail-view" id="skip">
+        <div class="form-row">
+            <label for="node-input-skip_count">Count</label>
+            <input type="number" id="node-input-skip_count" placeholder="Number of values to skip">
+        </div>
+    </div>
+
     <div class="form-row">
         <label for="node-input-name">Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -83,13 +103,16 @@
         color: '#b3f442',
         defaults: {
             name: { value: "" },
+            bufferCount_bufferSize: { value: 1, validate: RED.validators.number() },
+            bufferCount_startEvery: { value: 0, validate: RED.validators.number() },
             mapTo_topic: { value: "foo"},
             mapTo_payload: { value: "bar", validate: RED.validators.typedInput("payloadType") },
             mapTo_payloadType: { value : "str"},
-            take_count: { value: 1 },
+            take_count: { value: 1, validate: RED.validators.number()},
             filter_func : { value : "return msg.payload > 0"},
             scan_seed : { value: 0 },
             scan_func : { value : "return acc + msg.payload" },
+            skip_count : { value: 1, validate: RED.validators.number() },
             operatorType : { value: "none" }
         },
         inputs:1,

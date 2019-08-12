@@ -1,4 +1,4 @@
-const { take, takeUntil, filter, scan, map, mapTo, timeInterval } = require('rxjs/operators');
+const { take, takeUntil, filter, scan, map, mapTo, timeInterval, bufferCount, skip } = require('rxjs/operators');
 const { NodeRedObservable, evalFunc, convertNodeRedType } = require('./common.js');
 const _ = require('lodash');
 
@@ -42,6 +42,20 @@ module.exports = function (RED) {
 
         node.on('input', function (msg) {
             switch (config.operatorType) {
+                case "bufferCount":
+                        if (msg.topic === 'pipe') {
+                            const $observable = globalContext.get(msg.payload.observable)
+                            const bufferSize = _.toNumber(config.bufferCount_bufferSize);
+                            const startEvery = config.bufferCount_startEvery > 0 ? _.toNumber(config.bufferCount_startEvery) : null;
+                            observableWrapper.register(
+                                $observable.pipe(
+                                    bufferCount(bufferSize, startEvery)
+                                )
+                            )
+                            sendPipeMessage();
+                            showState("piped");
+                        }
+                        break;
                 case "mapTo":
                     if (msg.topic === 'pipe') {
                         var payload = convertNodeRedType(config.mapTo_payload, config.mapTo_payloadType)
@@ -119,6 +133,18 @@ module.exports = function (RED) {
                             )
                         )
                         sendPipeMessage()
+                        showState("piped");
+                    }
+                    break;
+                case "skip":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        observableWrapper.register(
+                            $observable.pipe(
+                                skip(config.skip_count)
+                            )
+                        )
+                        sendPipeMessage();
                         showState("piped");
                     }
                     break;

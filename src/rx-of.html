@@ -1,0 +1,42 @@
+<script type="text/x-red" data-template-name="rx of">
+    <div class="form-row">
+        <label for="node-input-mapTo">Topic</label>
+        <input type="text" id="node-input-topic" style="width: 70%" placeholder="Topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-mapTo">Payload</label>
+        <input type="text" id="node-input-payload" style="width: 70%" placeholder="Payload">
+        <input type="hidden" id="node-input-payloadType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('rx of',{
+        category: 'rxjs',
+        color: '#b3f442',
+        defaults: {
+            name: { value: "" },
+            topic: { value: "" },
+            payload: { value: "", validate: RED.validators.typedInput("payloadType") },
+            payloadType : { value: "str" }
+        },
+        inputs:0,
+        outputs:2,
+        icon: "file.png",
+        label: function() {
+            return this.name || "rx of";
+        },
+        inputLabels: [ ],
+        outputLabels: [ "pipe", "tap" ],
+        oneditprepare: function () {
+            $('#node-input-payload').typedInput({ 
+                types:[ "str", "num", "json" ],
+                typeField: $("#node-input-payloadType"),
+            });
+        }
+    });
+</script>
