@@ -58,17 +58,17 @@ module.exports = function (RED) {
                     switch (config.operatorType) {
                         case "combineLatest":
                             observableWrapper.register(
-                                combineLatest(inputObservables)
+                                combineLatest(...inputObservables)
                             )
                             break;
                         case "concat":
                             observableWrapper.register(
-                                concat(inputObservables)
+                                concat(...inputObservables)
                             )
                             break;
                         case "merge":
                             observableWrapper.register(
-                                merge(inputObservables)
+                                merge(...inputObservables)
                             )
                             break;
                         default:

@@ -1,4 +1,4 @@
-const { take, takeUntil, filter, scan, map, timeInterval } = require('rxjs/operators');
+const { take, takeUntil, filter, scan, map, mapTo, timeInterval } = require('rxjs/operators');
 const { NodeRedObservable, evalFunc } = require('./common.js');
 const _ = require('lodash');
 
@@ -42,6 +42,18 @@ module.exports = function (RED) {
 
         node.on('input', function (msg) {
             switch (config.operatorType) {
+                case "mapTo":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        observableWrapper.register(
+                            $observable.pipe(
+                                mapTo({ topic: config.mapTo_topic, payload: config.mapTo_payload })
+                            )
+                        )
+                        sendPipeMessage();
+                        showState("piped");
+                    }
+                    break;
                 case "take":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)

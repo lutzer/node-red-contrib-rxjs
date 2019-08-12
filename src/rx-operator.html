@@ -9,12 +9,25 @@
         <label for="node-input-operatorType">Operator</label>
         <select id="node-input-operatorType" style="width:270px !important">
             <option value="none" disabled selected>Select operator</option>
+            <option value="mapTo">mapTo</option>
             <option value="take">take</option>
             <option value="takeUntil">takeUntil</option>
             <option value="timeInterval">timeInterval</option>
             <option value="filter">filter</option>
             <option value="scan">scan</option>
         </select>
+    </div>
+
+    <div class="detail-view" id="mapTo">
+        <div class="form-row">
+            <label for="node-input-mapTo">Topic</label>
+            <input type="text" id="node-input-mapTo_topic" style="width: 70%" placeholder="Topic">
+        </div>
+        <div class="form-row">
+            <label for="node-input-mapTo">Payload</label>
+            <input type="text" id="node-input-mapTo_payload" style="width: 70%" placeholder="Payload">
+            <input type="hidden" id="node-input-mapTo_payloadType">
+        </div>
     </div>
 
     <div class="detail-view" id="take">
@@ -34,18 +47,18 @@
     <div class="detail-view" id="filter">
         <div class="form-row">
             <label for="node-input-filter_func">Expression</label>
-            <input type="text" id="node-input-filter_func" style="width: 60%" placeholder="Function for filtering messages.">
+            <input type="text" id="node-input-filter_func" style="width: 70%" placeholder="Function for filtering messages.">
         </div>
     </div>
 
     <div class="detail-view" id="scan">
         <div class="form-row">
             <label for="node-input-scan_seed">Initial Seed</label>
-            <input type="text" id="node-input-scan_seed" style="width: 60%" placeholder="Start Value">
+            <input type="text" id="node-input-scan_seed" style="width: 70%" placeholder="Start Value">
         </div>
         <div class="form-row">
             <label for="node-input-scan_func">Expression</label>
-            <input type="text" id="node-input-scan_func" style="width: 60%" placeholder="Reducer function">
+            <input type="text" id="node-input-scan_func" style="width: 70%" placeholder="Reducer function">
         </div>
     </div>
 
@@ -70,6 +83,9 @@
         color: '#b3f442',
         defaults: {
             name: { value: "" },
+            mapTo_topic: { value: "foo"},
+            mapTo_payload: { value: "bar", validate: RED.validators.typedInput("payloadType") },
+            mapTo_payloadType: { value : "str"},
             take_count: { value: 1 },
             filter_func : { value : "return msg.payload > 0"},
             scan_seed : { value: 0 },
@@ -97,8 +113,17 @@
 
             showDetailView(this.operatorType);
 
+
+            // mapTo inputs
+            $('#node-input-mapTo_payload').typedInput({ 
+                types:[ "str", "num", "json" ],
+                typeField: $("#node-input-mapTo_payloadType"),
+            });
+
+            // filter inputs
             $('#node-input-filter_func').typedInput({ types:[ inputTypes.function ]});
 
+            // scan inputs
             $('#node-input-scan_seed').typedInput({ types:[ inputTypes.function ]});
             $('#node-input-scan_func').typedInput({ types:[ inputTypes.function ]});
         },
