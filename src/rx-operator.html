@@ -10,12 +10,14 @@
         <select id="node-input-operatorType" style="width:270px !important">
             <option value="none" disabled selected>Select operator</option>
             <option value="bufferCount">bufferCount</option>
+            <option value="delay">delay</option>
             <option value="filter">filter</option>
             <option value="mapTo">mapTo</option>
             <option value="repeat">repeat</option>
             <option value="take">take</option>
             <option value="takeUntil">takeUntil</option>
             <option value="timeInterval">timeInterval</option>
+            <option value="timeout">timeout</option>
             <option value="scan">scan</option>
             <option value="skip">skip</option>
         </select>
@@ -29,6 +31,13 @@
         <div class="form-row">
             <label for="node-input-bufferCount_startEvery">Start Every</label>
             <input type="number" id="node-input-bufferCount_startEvery" placeholder="Start new buffer every">
+        </div>
+    </div>
+
+    <div class="detail-view" id="delay">
+        <div class="form-row">
+            <label for="node-input-delay">Delay</label>
+            <input type="number" id="node-input-delay" placeholder="Delay in ms">
         </div>
     </div>
 
@@ -62,6 +71,13 @@
         <div class="form-row">
             <label>Input</label>
             <span>Needs to receive an observable with topic <i>until</i>.</span>
+        </div>
+    </div>
+
+    <div class="detail-view" id="timeout">
+        <div class="form-row">
+            <label for="node-input-timeout">Count</label>
+            <input type="number" id="node-input-timeout" placeholder="Timeout in ms">
         </div>
     </div>
 
@@ -122,6 +138,8 @@
             scan_func : { value : "return acc + msg.payload" },
             skip_count : { value: 1},
             repeat_count: { value: 1 },
+            timeout: { value: 1000 },
+            delay: { value: 1000 },
             operatorType : { value: "none" }
         },
         inputs:1,

@@ -1,4 +1,4 @@
-const { take, takeUntil, filter, scan, map, mapTo, timeInterval, bufferCount, skip, repeat } = require('rxjs/operators');
+const { take, takeUntil, filter, scan, map, mapTo, timeInterval, bufferCount, skip, repeat, timeout, delay } = require('rxjs/operators');
 const { NodeRedObservable, evalFunc, convertNodeRedType } = require('./common.js');
 const _ = require('lodash');
 
@@ -43,19 +43,31 @@ module.exports = function (RED) {
         node.on('input', function (msg) {
             switch (config.operatorType) {
                 case "bufferCount":
-                        if (msg.topic === 'pipe') {
-                            const $observable = globalContext.get(msg.payload.observable)
-                            const bufferSize = _.toNumber(config.bufferCount_bufferSize);
-                            const startEvery = config.bufferCount_startEvery > 0 ? _.toNumber(config.bufferCount_startEvery) : null;
-                            observableWrapper.register(
-                                $observable.pipe(
-                                    bufferCount(bufferSize, startEvery)
-                                )
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        const bufferSize = _.toNumber(config.bufferCount_bufferSize);
+                        const startEvery = config.bufferCount_startEvery > 0 ? _.toNumber(config.bufferCount_startEvery) : null;
+                        observableWrapper.register(
+                            $observable.pipe(
+                                bufferCount(bufferSize, startEvery)
                             )
-                            sendPipeMessage();
-                            showState("piped");
-                        }
-                        break;
+                        )
+                        sendPipeMessage();
+                        showState("piped");
+                    }
+                    break;
+                case "delay":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        observableWrapper.register(
+                            $observable.pipe(
+                                delay(config.delay)
+                            )
+                        )
+                        sendPipeMessage();
+                        showState("piped");
+                    }
+                    break;
                 case "mapTo":
                     if (msg.topic === 'pipe') {
                         var payload = convertNodeRedType(config.mapTo_payload, config.mapTo_payloadType)
@@ -175,6 +187,18 @@ module.exports = function (RED) {
                                     msg.interval = val.interval;
                                     return msg;
                                 })
+                            )
+                        )
+                        sendPipeMessage()
+                        showState("piped");
+                    }
+                    break;
+                case "timeout":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        observableWrapper.register(
+                            $observable.pipe(
+                                timeout(config.timeout)
                             )
                         )
                         sendPipeMessage()
