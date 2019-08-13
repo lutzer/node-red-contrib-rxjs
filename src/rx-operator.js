@@ -1,4 +1,4 @@
-const { take, takeUntil, filter, scan, map, mapTo, timeInterval, bufferCount, skip } = require('rxjs/operators');
+const { take, takeUntil, filter, scan, map, mapTo, timeInterval, bufferCount, skip, repeat } = require('rxjs/operators');
 const { NodeRedObservable, evalFunc, convertNodeRedType } = require('./common.js');
 const _ = require('lodash');
 
@@ -63,6 +63,18 @@ module.exports = function (RED) {
                         observableWrapper.register(
                             $observable.pipe(
                                 mapTo({ topic: config.mapTo_topic, payload: payload })
+                            )
+                        )
+                        sendPipeMessage();
+                        showState("piped");
+                    }
+                    break;
+                case "repeat":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        observableWrapper.register(
+                            $observable.pipe(
+                                repeat(config.repeat_count)
                             )
                         )
                         sendPipeMessage();
