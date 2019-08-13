@@ -111,8 +111,8 @@
         color: '#b3f442',
         defaults: {
             name: { value: "" },
-            bufferCount_bufferSize: { value: 1, validate: RED.validators.number() },
-            bufferCount_startEvery: { value: 0, validate: RED.validators.number() },
+            bufferCount_bufferSize: { value: 1 },
+            bufferCount_startEvery: { value: 0 },
             mapTo_topic: { value: "foo"},
             mapTo_payload: { value: "bar", validate: RED.validators.typedInput("payloadType") },
             mapTo_payloadType: { value : "str"},
@@ -120,8 +120,8 @@
             filter_func : { value : "return msg.payload > 0"},
             scan_seed : { value: 0 },
             scan_func : { value : "return acc + msg.payload" },
-            skip_count : { value: 1, validate: RED.validators.number() },
-            repeat_count: { value: 1, validate: RED.validators.number() },
+            skip_count : { value: 1},
+            repeat_count: { value: 1 },
             operatorType : { value: "none" }
         },
         inputs:1,

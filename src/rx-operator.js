@@ -72,6 +72,10 @@ module.exports = function (RED) {
                 case "repeat":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
+                        if (!_.isNumber(config.repeat_count) && config.repeat_count < 1) {
+                            node.error("count must be bigger than 0")
+                            break;
+                        }
                         observableWrapper.register(
                             $observable.pipe(
                                 repeat(config.repeat_count)
