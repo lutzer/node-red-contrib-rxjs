@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/index.js"
+    "test": "mocha \"test/**/*_spec.js\""
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +24,8 @@
     "rxjs": "^6.5.2"
   },
   "devDependencies": {
-    "mocha": "^5.2.0"
+    "node-red": "^0.20.7",
+    "node-red-node-test-helper": "^0.2.3",
+    "uuid": "^3.3.2"
   }
 }

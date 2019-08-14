@@ -234,9 +234,9 @@ module.exports = function (RED) {
                             $observable.pipe(
                                 timeInterval(),
                                 map( (val) => {
-                                    const msg = val.value;
-                                    msg.interval = val.interval;
-                                    return msg;
+                                    const result = val.value;
+                                    result.interval = val.interval;
+                                    return result;
                                 })
                             )
                         )
