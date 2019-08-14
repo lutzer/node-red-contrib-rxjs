@@ -1,4 +1,7 @@
-const { take, takeUntil, filter, scan, map, mapTo, timeInterval, bufferCount, skip, repeat, timeout, delay } = require('rxjs/operators');
+const { take, takeUntil, filter, scan, map, mapTo, 
+        timeInterval, bufferCount, skip, repeat, timeout, 
+        delay, catchError, retry, distinctUntilChanged } = require('rxjs/operators');
+const { of } = require('rxjs');
 const { NodeRedObservable, evalFunc, convertNodeRedType } = require('./common.js');
 const _ = require('lodash');
 
@@ -56,12 +59,45 @@ module.exports = function (RED) {
                         showState("piped");
                     }
                     break;
+                case "catch":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        const catchFunc = new Function('error', config.catch_func);
+                        observableWrapper.register(
+                            $observable.pipe(
+                                catchError( (err) => {
+                                    return of(catchFunc(err));
+                                })
+                            )
+                        )
+                        sendPipeMessage();
+                        showState("piped");
+                    }
+                    break;
                 case "delay":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
                         observableWrapper.register(
                             $observable.pipe(
                                 delay(config.delay)
+                            )
+                        )
+                        sendPipeMessage();
+                        showState("piped");
+                    }
+                    break;
+                case "distinctUntilKeyChanged":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        console.log(config.distinct_key)
+                        observableWrapper.register(
+                            $observable.pipe(
+                                distinctUntilChanged( (prev, curr) => {
+                                    if (_.isEmpty(config.distinct_key))
+                                        return _.isEqual(_.omit(prev, '_msgid'), _.omit(curr, '_msgid'));
+                                    else
+                                        return _.isEqual(_.get(prev, config.distinct_key), _.get(curr, config.distinct_key));
+                                })
                             )
                         )
                         sendPipeMessage();
@@ -91,6 +127,22 @@ module.exports = function (RED) {
                         observableWrapper.register(
                             $observable.pipe(
                                 repeat(config.repeat_count)
+                            )
+                        )
+                        sendPipeMessage();
+                        showState("piped");
+                    }
+                    break;
+                case "retry":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        if (!_.isNumber(config.retry_number) && config.retry_number < 1) {
+                            node.error("number must be bigger than 0")
+                            break;
+                        }
+                        observableWrapper.register(
+                            $observable.pipe(
+                                retry(config.retry_number)
                             )
                         )
                         sendPipeMessage();

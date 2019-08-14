@@ -10,10 +10,13 @@
         <select id="node-input-operatorType" style="width:270px !important">
             <option value="none" disabled selected>Select operator</option>
             <option value="bufferCount">bufferCount</option>
+            <option value="catch">catch</option>
             <option value="delay">delay</option>
+            <option value="distinctUntilKeyChanged">distinctUntilKeyChanged</option>
             <option value="filter">filter</option>
             <option value="mapTo">mapTo</option>
             <option value="repeat">repeat</option>
+            <option value="retry">retry</option>
             <option value="take">take</option>
             <option value="takeUntil">takeUntil</option>
             <option value="timeInterval">timeInterval</option>
@@ -34,10 +37,28 @@
         </div>
     </div>
 
+    <div class="detail-view" id="catch">
+        <div class="form-row">
+            <label for="node-input-catch_func">Expression</label>
+            <input type="text" id="node-input-catch_func" style="width: 70%" placeholder="Function for returning an observable">
+        </div>
+    </div>
+
     <div class="detail-view" id="delay">
         <div class="form-row">
             <label for="node-input-delay">Delay</label>
             <input type="number" id="node-input-delay" placeholder="Delay in ms">
+        </div>
+    </div>
+
+    <div class="detail-view" id="distinctUntilKeyChanged">
+        <div class="form-row">
+            <label for="node-input-distinct_key">Key</label>
+            <input type="text" id="node-input-distinct_key" placeholder="specify key to compare. empty = whole msg">
+        </div>
+        <div class="form-row">
+            <label></label>
+            <span style="width: 70%">Compare nested values with "payload.x"</span>
         </div>
     </div>
 
@@ -57,6 +78,13 @@
         <div class="form-row">
             <label for="node-input-repeat_count">Count</label>
             <input type="number" id="node-input-repeat_count" placeholder="Number of repeats">
+        </div>
+    </div>
+
+    <div class="detail-view" id="retry">
+        <div class="form-row">
+            <label for="node-input-retry_number">Number</label>
+            <input type="number" id="node-input-retry_number" placeholder="Number of retries">
         </div>
     </div>
 
@@ -128,7 +156,9 @@
         defaults: {
             name: { value: "" },
             bufferCount_bufferSize: { value: 1 },
-            bufferCount_startEvery: { value: 0 },
+            bufferCount_startEvery: { value: undefined },
+            catch_func: { value: 'return { topic : "error", payload: error }' },
+            distinct_key: { value: 'payload' },
             mapTo_topic: { value: "foo"},
             mapTo_payload: { value: "bar", validate: RED.validators.typedInput("payloadType") },
             mapTo_payloadType: { value : "str"},
@@ -138,6 +168,7 @@
             scan_func : { value : "return acc + msg.payload" },
             skip_count : { value: 1},
             repeat_count: { value: 1 },
+            retry_number: { value: 1 },
             timeout: { value: 1000 },
             delay: { value: 1000 },
             operatorType : { value: "none" }
@@ -169,6 +200,9 @@
                 types:[ "str", "num", "json" ],
                 typeField: $("#node-input-mapTo_payloadType"),
             });
+
+            // catch inputs
+            $('#node-input-catch_func').typedInput({ types:[ inputTypes.function ]});
 
             // filter inputs
             $('#node-input-filter_func').typedInput({ types:[ inputTypes.function ]});
