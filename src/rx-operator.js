@@ -89,7 +89,6 @@ module.exports = function (RED) {
                 case "distinctUntilKeyChanged":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
-                        console.log(config.distinct_key)
                         observableWrapper.register(
                             $observable.pipe(
                                 distinctUntilChanged( (prev, curr) => {
@@ -198,7 +197,7 @@ module.exports = function (RED) {
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
                         const scanFunc = new Function('acc', 'msg', config.scan_func);
-                        const scanSeed = evalFunc(config.scan_seed);
+                        const scanSeed = convertNodeRedType(config.scan_seed, config.scan_seedType)
                         observableWrapper.register(
                             $observable.pipe(
                                 scan( (acc, msg) => {

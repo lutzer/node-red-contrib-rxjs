@@ -120,6 +120,7 @@
         <div class="form-row">
             <label for="node-input-scan_seed">Initial Seed</label>
             <input type="text" id="node-input-scan_seed" style="width: 70%" placeholder="Start Value">
+            <input type="hidden" id="node-input-scan_seedType">
         </div>
         <div class="form-row">
             <label for="node-input-scan_func">Expression</label>
@@ -160,11 +161,12 @@
             catch_func: { value: 'return { topic : "error", payload: error }' },
             distinct_key: { value: 'payload' },
             mapTo_topic: { value: "foo"},
-            mapTo_payload: { value: "bar", validate: RED.validators.typedInput("payloadType") },
+            mapTo_payload: { value: "bar", validate: RED.validators.typedInput("mapTo_payloadType") },
             mapTo_payloadType: { value : "str"},
             take_count: { value: 1, validate: RED.validators.number()},
             filter_func : { value : "return msg.payload > 0"},
-            scan_seed : { value: 0 },
+            scan_seed : { value: 0, validate: RED.validators.typedInput("scan_seedType") },
+            scan_seedType: { value: "num" },
             scan_func : { value : "return acc + msg.payload" },
             skip_count : { value: 1},
             repeat_count: { value: 1 },
@@ -208,7 +210,10 @@
             $('#node-input-filter_func').typedInput({ types:[ inputTypes.function ]});
 
             // scan inputs
-            $('#node-input-scan_seed').typedInput({ types:[ inputTypes.function ]});
+            $('#node-input-scan_seed').typedInput({ 
+                types:[ "str", "num", "json" ],
+                typeField: $("#node-input-scan_seedType"),
+            });
             $('#node-input-scan_func').typedInput({ types:[ inputTypes.function ]});
         },
         oneditsave: function () {
