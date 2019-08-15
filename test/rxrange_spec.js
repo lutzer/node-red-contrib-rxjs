@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const assert = require('assert');
 const helper = require("node-red-node-test-helper");
+const { of, fromEvent } = require('rxjs');
+const { scan, timeout, catchError, pairwise } = require('rxjs/operators');
 
 helper.init(require.resolve('node-red'));
 
@@ -37,29 +39,58 @@ describe('of Range', function () {
         })
     });
 
-    it('should be able to send a msg sequence', function(done) {
+    it('should be able to send a msg sequence with correct payload and topic', function(done) {
 
-        const from = Math.ceil(Math.random() * 100);
-        const to = from + Math.ceil(Math.random() * 100);
+        const start = Math.ceil(Math.random() * 100);
+        const count = Math.ceil(Math.random() * 100);
 
         var flow = [
-            { id: 'n1', type: 'rx range', wires:[["n2"]], from: from, to: to },
+            { id: 'n1', type: 'rx range', wires:[["n2"]], start: start, count: count },
             { id: 'n2', type: 'rx subscriber', auto_subscribe: true, wires:[['out']] },
             { id: 'out', type: 'helper' }
         ];
 
-        var then = Date.now();
+        helper.load([rangeNode, subscriberNode], flow, function() {
+            var out = helper.getNode("out");
+    
+            fromEvent(out,'input').pipe(
+                scan( (acc, msg) => {
+                    assert.equal(msg.topic,"range");
+                    assert.equal(msg.payload, acc + start);
+                    return acc + 1;
+                },0)
+            ).subscribe((val) => {
+                if (val == count)
+                    done();
+            });
+        })
+    });
+
+    it('should exactly send <count> messages', function(done) {
+
+        const start = Math.ceil(Math.random() * 100);
+        const count = Math.ceil(Math.random() * 100);
+
+        var flow = [
+            { id: 'n1', type: 'rx range', wires:[["n2"]], start: start, count: count },
+            { id: 'n2', type: 'rx subscriber', auto_subscribe: true, wires:[['out']] },
+            { id: 'out', type: 'helper' }
+        ];
 
         helper.load([rangeNode, subscriberNode], flow, function() {
             var out = helper.getNode("out");
-            
-            var i = 0;
-            out.on('input', (msg) => {
-                assert(msg.topic === "range")
-                assert(msg.payload === from + i);
-                i++;
-                if (i === to - from)
+    
+            fromEvent(out,'input').pipe(
+                timeout(10),
+                catchError( (err) => {
+                    return of("timeout");
+                }),
+                pairwise()
+            ).subscribe( (val) => {
+                if (val[1] === "timeout") {
+                    assert.equal(val[0].payload, start + count - 1);
                     done();
+                }
             })
         })
     });

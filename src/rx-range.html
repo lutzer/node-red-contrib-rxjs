@@ -1,11 +1,11 @@
 <script type="text/x-red" data-template-name="rx range">
     <div class="form-row">
-        <label for="node-input-from">From</label>
-        <input type="number" id="node-input-from">
+        <label for="node-input-start">Start</label>
+        <input type="number" id="node-input-start">
     </div>
     <div class="form-row">
-        <label for="node-input-to">To</label>
-        <input type="number" id="node-input-to">
+        <label for="node-input-count">Count</label>
+        <input type="number" id="node-input-count">
     </div>
     <div class="form-row">
         <label for="node-input-name">Name</label>
@@ -19,8 +19,8 @@
         color: '#b3f442',
         defaults: {
             name: { value: "" },
-            from: { value: 0, required: true, validate:RED.validators.number() },
-            to: { value: 10, required: true, validate:RED.validators.number() }
+            start: { value: 0, required: true, validate:RED.validators.number() },
+            count: { value: 10, required: true, validate:RED.validators.number() }
         },
         inputs:0,
         outputs:2,

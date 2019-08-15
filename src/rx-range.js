@@ -20,7 +20,7 @@ module.exports = function (RED) {
         });
 
         observableWrapper.register(
-            range(config.from, config.to).pipe( 
+            range(config.start, config.count).pipe( 
                 map( (val) => {
                     return { topic: "range", payload: val }
                 })
