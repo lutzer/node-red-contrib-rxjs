@@ -62,7 +62,12 @@ module.exports = function (RED) {
                 case "catch":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
-                        const catchFunc = new Function('error', config.catch_func);
+                        try {
+                            var catchFunc = new Function('error', config.catch_func);
+                        } catch (err) {
+                            node.error(err, msg);
+                            break;
+                        }
                         observableWrapper.register(
                             $observable.pipe(
                                 catchError( (err) => {

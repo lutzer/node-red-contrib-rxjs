@@ -2,7 +2,7 @@ const _ = require('lodash');
 const assert = require('assert');
 const helper = require("node-red-node-test-helper");
 const uuidv1 = require('uuid/v1');
-const { fromEvent, zip, combineLatest } = require('rxjs');
+const { fromEvent, throwError, of } = require('rxjs');
 const { skip, first, scan } = require('rxjs/operators');
 
 helper.init(require.resolve('node-red'));
@@ -88,6 +88,63 @@ describe('operator node', function () {
                     if (val >= 100)
                         done();
                 });
+            });
+        })
+    })
+
+    describe('catch', () => {
+
+        it('should throw an error when catch funcion is wrong', (done) => {
+
+            var errorString = uuidv1();
+
+            var flow = [
+                { id: 'op', type: 'rx operator', operatorType: 'catch', catch_func: 'return { topic : "error", payload: error', wires:[[]] },
+            ];
+
+            helper.load([rangeNode, operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                const global = op.context().global;
+
+                var $observable = throwError(errorString);
+                global.set('error', $observable); 
+
+                op.receive({topic : 'pipe', payload : { observable : 'error'}})
+
+                setTimeout( () => {
+                    //console.log(op.error.called)
+                    assert(op.error.called);
+                    done();
+                },100)
+
+            });
+        })
+
+        it('should catch an error, supplying a ctahc function', (done) => {
+
+            var errorString = uuidv1();
+
+            var flow = [
+                { id: 'op', type: 'rx operator', operatorType: 'catch', catch_func: 'return { topic : "error", payload: error }', wires:[['sub']] },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([rangeNode, operatorNode, subscriberNode], flow, function() {
+                var out = helper.getNode("out");
+                var op = helper.getNode('op');
+                const global = op.context().global;
+
+                var $observable = throwError(errorString);
+                global.set('error', $observable);
+                
+                fromEvent(out,'input').pipe( ).subscribe( (msg) => {
+                    assert.equal(msg.payload, errorString)
+                    done();
+                })  
+
+                op.receive({topic : 'pipe', payload : { observable : 'error'}})
+
             });
         })
     })
