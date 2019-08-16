@@ -10,6 +10,8 @@ helper.init(require.resolve('node-red'));
 describe('subscriber node', function () {
 
     const ofNode = require('./../src/rx-of');
+    const operatorNode = require('./../src/rx-operator');
+    const nodeRange = require('./../src/rx-range');
     const subscriberNode = require('./../src/rx-subscriber');
     const timerNode = require('./../src/rx-timer');
 
@@ -139,6 +141,28 @@ describe('subscriber node', function () {
             setTimeout( () => {
                 subscriber.receive({ topic: 'subscribe' });
             },50)
+            
+        })
+    });
+
+    it('should combine values when <bundle> is true', function(done) {
+
+        var flow = [
+            { id: 'n1', type: 'rx range', start: 0, count: 10, wires:[["n2"]]},
+            { id: 'n2', type: 'rx operator', operatorType: 'bufferCount', bufferCount_bufferSize: 10, wires:[["subscriber"]]},
+            { id: 'subscriber', type: 'rx subscriber', auto_subscribe: true, bundle: true, wires:[['out']] },
+            { id: 'out', type: 'helper' }
+        ];
+
+
+        helper.load([nodeRange, operatorNode, subscriberNode], flow, function() {
+            var out = helper.getNode("out");
+            var subscriber = helper.getNode("subscriber");
+            
+            fromEvent(out, 'input').pipe().subscribe( (msg) => {
+                assert(_.isArray(msg.payload))
+                done();
+            })
             
         })
     });

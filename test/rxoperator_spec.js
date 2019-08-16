@@ -3,13 +3,14 @@ const assert = require('assert');
 const helper = require("node-red-node-test-helper");
 const uuidv1 = require('uuid/v1');
 const { fromEvent, zip, combineLatest } = require('rxjs');
-const { skip } = require('rxjs/operators');
+const { skip, first, scan } = require('rxjs/operators');
 
 helper.init(require.resolve('node-red'));
 
 describe('operator node', function () {
 
     const ofNode = require('./../src/rx-of');
+    const rangeNode = require('./../src/rx-range');
     const operatorNode = require('./../src/rx-operator');
     const subscriberNode = require('./../src/rx-subscriber');
 
@@ -24,8 +25,8 @@ describe('operator node', function () {
 
     it('should pipe an observable', function(done) {
         var flow = [
-            { id: 'n1', type: 'rx of', wires:[["n2"]] },
-            { id: 'n2', type: 'rx operator', operatorType: 'take', wires:[['out']] },
+            { id: 'n1', type: 'rx of', wires:[["op"]] },
+            { id: 'op', type: 'rx operator', operatorType: 'take', wires:[['out']] },
             { id: 'out', type: 'helper' }
         ];
 
@@ -43,8 +44,51 @@ describe('operator node', function () {
     })
 
     describe('bufferCount', function () {
-        it('should test', () => {
+        it('should buffer <bufferCount_bufferSize> msgs', (done) => {
 
+            var bufferSize = Math.ceil(Math.random()*99);
+
+            var flow = [
+                { id: 'n1', type: 'rx range', wires:[["op"]], start: 0, count: 100  },
+                { id: 'op', type: 'rx operator', operatorType: 'bufferCount', bufferCount_bufferSize: bufferSize, wires:[['sub']] },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([rangeNode, operatorNode, subscriberNode], flow, function() {
+                var out = helper.getNode("out");
+                
+                fromEvent(out,'input').pipe( first() ).subscribe( (msg) => {
+                    assert.equal(msg.payload.length, bufferSize)
+                    done();
+                })  
+            });
+        })
+
+        it('should start buffer on <bufferCount_startEvery>', (done) => {
+
+            var bufferSize = 10;
+            var startEvery = 1 + Math.ceil((Math.random()*10));
+
+            var flow = [
+                { id: 'n1', type: 'rx range', wires:[["op"]], start: 0, count: 100  },
+                { id: 'op', type: 'rx operator', operatorType: 'bufferCount', 
+                    bufferCount_bufferSize: bufferSize, bufferCount_startEvery: startEvery, wires:[['sub']] },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([rangeNode, operatorNode, subscriberNode], flow, function() {
+                var out = helper.getNode("out");
+                
+                fromEvent(out,'input').pipe( scan( (acc, msg) => {
+                    assert(msg.payload[0] == acc);
+                    return acc + startEvery;
+                },0)).subscribe( (val) => {
+                    if (val >= 100)
+                        done();
+                });
+            });
         })
     })
 
