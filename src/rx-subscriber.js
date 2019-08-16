@@ -5,7 +5,7 @@ const { unsubscribe } = require('./common.js');
 
 module.exports = function (RED) {
 	function RxNode (config) {
-		RED.nodes.createNode(this, config);
+        RED.nodes.createNode(this, config);
 
 		var node = this;
         var context = this.context();

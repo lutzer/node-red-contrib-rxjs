@@ -29,15 +29,6 @@ class NodeRedObservable extends EventEmitter {
         }
     }
 
-    get returnMessage() {
-        return {
-            topic: "returns",
-            payload: {
-                observable: this.observableName
-            }
-        }
-    }
-
     remove() {
         this.removeAllListeners("tap");
         this.globalContext.set(this.observableName, undefined);

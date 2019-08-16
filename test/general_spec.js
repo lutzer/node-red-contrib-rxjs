@@ -5,7 +5,7 @@ const { of } = require('rxjs');
 
 helper.init(require.resolve('node-red'));
 
-describe('Common functions', function () {
+describe('common functions', function () {
 
     beforeEach(function (done) {
         helper.startServer(done);
@@ -31,6 +31,24 @@ describe('Common functions', function () {
 
             const $observable = global.get(observableWrapper.observableName);
             assert(_.isObject($observable));
+            done();
+        })
+    });
+
+    it('NodeRedObservable should remove observable from global space', function(done) {
+        var flow = [
+            { id: 'node', type: 'helper' }
+        ];
+        helper.load([], flow, function() {
+            const node = helper.getNode("node");
+            const global = node.context().global;
+            
+            const observableWrapper = new NodeRedObservable(node);
+            observableWrapper.register( of('test') );
+            observableWrapper.remove()
+
+            const $observable = global.get(observableWrapper.observableName);
+            assert(_.isUndefined($observable));
             done();
         })
     });

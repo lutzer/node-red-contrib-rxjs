@@ -6,7 +6,7 @@ const { scan, timeout, catchError, pairwise } = require('rxjs/operators');
 
 helper.init(require.resolve('node-red'));
 
-describe('of Range', function () {
+describe('range node', function () {
 
     const rangeNode = require('./../src/rx-range');
     const subscriberNode = require('./../src/rx-subscriber');
@@ -31,7 +31,7 @@ describe('of Range', function () {
             var out = helper.getNode("out");
             var global = out.context().global;
             
-            out.on('input', (msg) => {
+            fromEvent(out, 'input').subscribe( (msg) => {
                 assert(msg.topic === 'pipe');
                 assert( _.isObject(global.get(msg.payload.observable)) );
                 done();

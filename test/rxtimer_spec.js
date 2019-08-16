@@ -2,10 +2,12 @@ const _ = require('lodash');
 const assert = require('assert');
 const helper = require("node-red-node-test-helper");
 const uuidv1 = require('uuid/v1');
+const { fromEvent } = require('rxjs');
+const { skip, scan } = require('rxjs/operators');
 
 helper.init(require.resolve('node-red'));
 
-describe('of Timer', function () {
+describe('timer node', function () {
 
     const timerNode = require('./../src/rx-timer');
     const subscriberNode = require('./../src/rx-subscriber');
@@ -30,7 +32,7 @@ describe('of Timer', function () {
             var out = helper.getNode("out");
             var global = out.context().global;
             
-            out.on('input', (msg) => {
+            fromEvent(out, 'input').subscribe( (msg) => {
                 assert(msg.topic === 'pipe');
                 assert( _.isObject(global.get(msg.payload.observable)) );
                 done();
@@ -53,7 +55,7 @@ describe('of Timer', function () {
         helper.load([timerNode, subscriberNode], flow, function() {
             var out = helper.getNode("out");
             
-            out.on('input', (msg) => {
+            fromEvent(out, 'input').subscribe( (msg) => {
                assert(msg.topic === "timer")
                assert(msg.payload === 0)
                var deltaT = Date.now() - then;
@@ -78,13 +80,12 @@ describe('of Timer', function () {
             var out = helper.getNode("out");
             var n2 = helper.getNode("n2");
             
-            let i = 0;
-            out.on('input', (msg) => {
-                assert(msg.topic === "timer");
-                assert(msg.payload === i);
-                i++;
-                if (i > 5)
-                    done();
+            fromEvent(out, 'input').pipe( scan( (acc, msg) => {
+                assert.equal(msg.topic, "timer");
+                assert.equal(msg.payload, acc);
+                return acc + 1;
+            }, 0), skip(5) ).subscribe( (val) => {
+                done();
             })
         })
     });

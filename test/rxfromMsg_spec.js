@@ -6,9 +6,9 @@ const { fromEvent } = require('rxjs');
 
 helper.init(require.resolve('node-red'));
 
-describe('of node', function () {
+describe('fromMsg node', function () {
 
-    const ofNode = require('./../src/rx-of');
+    const fromMsgNode = require('./../src/rx-fromMsg');
     const subscriberNode = require('./../src/rx-subscriber');
 
     beforeEach(function (done) {
@@ -23,11 +23,11 @@ describe('of node', function () {
     
     it('should send a pipe msg with observable', function(done) {
         var flow = [
-            { id: 'n1', type: 'rx of', wires:[["out"]] },
+            { id: 'n1', type: 'rx fromMsg', wires:[["out"]] },
             { id: 'out', type: 'helper' }
         ];
 
-        helper.load(ofNode, flow, function() {
+        helper.load(fromMsgNode, flow, function() {
             var out = helper.getNode("out");
             var global = out.context().global;
             
@@ -39,26 +39,30 @@ describe('of node', function () {
         })
     });
 
-    it('should be able to subscribe to it and receive a message', function(done) {
+    it('should be able to subscribe to it and receive a message on input', function(done) {
 
         const topic = uuidv1();
         const payload = uuidv1();
 
         var flow = [
-            { id: 'n1', type: 'rx of', wires:[["n2"]], topic: topic, payload: payload },
+            { id: 'n1', type: 'rx fromMsg', wires:[["n2"]] },
             { id: 'n2', type: 'rx subscriber', auto_subscribe: true, wires:[['out']] },
             { id: 'out', type: 'helper' }
         ];
 
-        helper.load([ofNode, subscriberNode], flow, function() {
+        helper.load([fromMsgNode, subscriberNode], flow, function() {
             var out = helper.getNode("out");
-            var n2 = helper.getNode("n2");
+            var n1 = helper.getNode("n1");
             
             fromEvent(out, 'input').subscribe( (msg) => {
-               assert.equal(msg.topic, topic)
-               assert.equal(msg.payload, payload)
+               assert(msg.topic === topic)
+               assert(msg.payload === payload)
                done();
             })
+
+            setTimeout( () => {
+                n1.receive({ topic: topic, payload : payload })
+            },50)
         })
     });
 })
