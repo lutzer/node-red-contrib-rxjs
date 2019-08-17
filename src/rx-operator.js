@@ -49,7 +49,10 @@ module.exports = function (RED) {
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
                         const bufferSize = _.toNumber(config.bufferCount_bufferSize);
-                        const startEvery = config.bufferCount_startEvery > 0 ? _.toNumber(config.bufferCount_startEvery) : null;
+                        const startEvery = _.toNumber(config.bufferCount_startEvery) > 0 ? _.toNumber(config.bufferCount_startEvery) : null;
+                        if (bufferSize <= 0) {
+                            node.error("buffer size must be bigger than 0.", msg)
+                        }
                         observableWrapper.register(
                             $observable.pipe(
                                 bufferCount(bufferSize, startEvery)
@@ -82,9 +85,14 @@ module.exports = function (RED) {
                 case "delay":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
+                        const delayTime = _.toNumber(config.delay)
+                        if (_.isNaN(delayTime) || delayTime <= 0) {
+                            node.error("delay time must be bigger than 0", msg);
+                            break;
+                        }
                         observableWrapper.register(
                             $observable.pipe(
-                                delay(config.delay)
+                                delay(delayTime)
                             )
                         )
                         sendPipeMessage();

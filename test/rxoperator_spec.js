@@ -2,8 +2,8 @@ const _ = require('lodash');
 const assert = require('assert');
 const helper = require("node-red-node-test-helper");
 const uuidv1 = require('uuid/v1');
-const { fromEvent, throwError, of } = require('rxjs');
-const { skip, first, scan } = require('rxjs/operators');
+const { fromEvent, throwError, of, timer } = require('rxjs');
+const { skip, first, scan, timeInterval, takeUntil, reduce } = require('rxjs/operators');
 
 helper.init(require.resolve('node-red'));
 
@@ -149,50 +149,147 @@ describe('operator node', function () {
         })
     })
 
-    // it('should be able to manually subscribe to an observable and receive a message', function(done) {
-    //     var flow = [
-    //         { id: 'n1', type: 'rx of', wires:[["subscriber"]]},
-    //         { id: 'subscriber', type: 'rx subscriber', auto_subscribe: false, wires:[['out']] },
-    //         { id: 'out', type: 'helper' }
-    //     ];
+    describe('delay', function() {
+        it('should delay a message', (done) => {
 
+            var delayTime = Math.random()*100;
 
-    //     helper.load([ofNode, subscriberNode], flow, function() {
-    //         var out = helper.getNode("out");
-    //         var subscriber = helper.getNode("subscriber");
-            
-    //         out.on('input', (msg) => {
-    //             done();
-    //         })
+            var flow = [
+                { id: 'op', type: 'rx operator', operatorType: 'delay', delay: delayTime, wires:[['sub']] },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
 
-    //         setTimeout( () => {
-    //             subscriber.receive({ topic: 'subscribe' });
-    //         },50)
-            
-    //     })
-    // });
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
 
-    // it('should send a complete msg', function(done) {
-    //     var flow = [
-    //         { id: 'n1', type: 'rx of', wires:[["subscriber"]] },
-    //         { id: 'subscriber', type: 'rx subscriber', auto_subscribe: true, wires:[ ['out'] ,['complete']] },
-    //         { id: 'out', type: 'helper' },
-    //         { id: 'complete', type: 'helper' }
-    //     ];
+                var $observable = of('test');
+                global.set('observable', $observable); 
 
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
 
-    //     helper.load([ofNode, subscriberNode], flow, function() {
-    //         var out = helper.getNode("out");
-    //         var complete = helper.getNode("complete");
-            
-    //         zip(
-    //             fromEvent(out, 'input'),
-    //             fromEvent(complete, 'input'),
-    //         ).pipe().subscribe( (vals) => {
-    //             assert.equal(vals[1].topic, 'completed')
-    //             done();
-    //         });
-            
-    //     })
-    // });
+                fromEvent(out,'input').pipe( timeInterval() ).subscribe( (msg) => {
+                    assert(Math.abs(delayTime - msg.interval) < 10);
+                    done();
+                })
+            });
+        })
+
+        it('should give an error when no delayTime is specified', (done) => {
+
+            var flow = [
+                { id: 'op', type: 'rx operator', operatorType: 'delay', wires:[['sub']] }
+            ];
+
+            helper.load([operatorNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = of('test');
+                global.set('observable', $observable); 
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+
+                setTimeout( () => {
+                    assert(op.error.called);
+                    done();
+                },100)
+            });
+        })
+    });
+
+    describe('distinctUntilKeyChanged', function() {
+        it('should not emit twice when msg is the same', (done) => {
+            var string = uuidv1();
+
+            var flow = [
+                { id: 'op', type: 'rx operator', operatorType: 'distinctUntilKeyChanged', wires:[['sub']] },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                var sub = helper.getNode('sub');
+                const global = op.context().global;
+
+                var $observable = of(string, string);
+                global.set('observable', $observable); 
+
+                fromEvent(out,'input').pipe( 
+                    takeUntil( timer(100) ),
+                    reduce( (acc) => acc + 1, 0), 
+                ).subscribe( (val) => {
+                    assert.equal(val, 1);
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        })
+
+        it('should not emit twice when selected property is the same', (done) => {
+            var string = uuidv1();
+
+            var flow = [
+                { id: 'op', type: 'rx operator', operatorType: 'distinctUntilKeyChanged', distinct_key: 'x', wires:[['sub']] },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                var sub = helper.getNode('sub');
+                const global = op.context().global;
+
+                var $observable = of({x : 4, y: 3}, {x : 4, y: 2});
+                global.set('observable', $observable); 
+
+                fromEvent(out,'input').pipe( 
+                    takeUntil( timer(100) ),
+                    reduce( (acc) => acc + 1, 0), 
+                ).subscribe( (val) => {
+                    assert.equal(val, 1);
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        })
+
+        it('should emit twice when selected property changed', (done) => {
+            var string = uuidv1();
+
+            var flow = [
+                { id: 'op', type: 'rx operator', operatorType: 'distinctUntilKeyChanged', distinct_key: 'y', wires:[['sub']] },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                var sub = helper.getNode('sub');
+                const global = op.context().global;
+
+                var $observable = of({x : 4, y: 3}, {x : 4, y: 2});
+                global.set('observable', $observable); 
+
+                fromEvent(out,'input').pipe( 
+                    takeUntil( timer(100) ),
+                    reduce( (acc) => acc + 1, 0), 
+                ).subscribe( (val) => {
+                    assert.equal(val, 2);
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        })
+    });
 })
