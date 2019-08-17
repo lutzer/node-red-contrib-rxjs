@@ -118,7 +118,12 @@ module.exports = function (RED) {
                     break;
                 case "mapTo":
                     if (msg.topic === 'pipe') {
-                        var payload = convertNodeRedType(config.mapTo_payload, config.mapTo_payloadType)
+                        try {
+                            var payload = convertNodeRedType(config.mapTo_payload, config.mapTo_payloadType)
+                        } catch (err) {
+                            console.log(err)
+                        }
+                        
                         const $observable = globalContext.get(msg.payload.observable)
                         observableWrapper.register(
                             $observable.pipe(
@@ -132,7 +137,7 @@ module.exports = function (RED) {
                 case "repeat":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
-                        if (!_.isNumber(config.repeat_count) && config.repeat_count < 1) {
+                        if (!_.isNumber(config.repeat_count) || config.repeat_count <= 0) {
                             node.error("count must be bigger than 0")
                             break;
                         }
@@ -148,7 +153,7 @@ module.exports = function (RED) {
                 case "retry":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
-                        if (!_.isNumber(config.retry_number) && config.retry_number < 1) {
+                        if (!_.isNumber(config.retry_number) || config.retry_number < 1) {
                             node.error("number must be bigger than 0")
                             break;
                         }

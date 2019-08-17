@@ -50,7 +50,11 @@ module.exports = {
     convertNodeRedType : function(val, type) {
         switch (type) {
             case 'json':
-                return JSON.parse(val);
+                try {
+                    return JSON.parse(val);
+                } catch (err) {
+                    return val;
+                }
             case 'num':
                 return _.toNumber(val);
             case 'str':

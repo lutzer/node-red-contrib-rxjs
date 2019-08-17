@@ -2,10 +2,23 @@ const _ = require('lodash');
 const assert = require('assert');
 const helper = require("node-red-node-test-helper");
 const uuidv1 = require('uuid/v1');
-const { fromEvent, throwError, of, timer } = require('rxjs');
-const { skip, first, scan, timeInterval, takeUntil, reduce } = require('rxjs/operators');
+const { fromEvent, throwError, of, timer, range } = require('rxjs');
+const { skip, first, scan, timeInterval, takeUntil, reduce, mergeMap, filter } = require('rxjs/operators');
 
 helper.init(require.resolve('node-red'));
+
+function createRandomValue(type) {
+    if (type === 'str')
+        return uuidv1();
+    else if (type === 'num')
+        return Math.random() * 1000;
+    else if (type === 'json')
+        return {
+            number : Math.random(),
+            string : uuidv1(),
+            array : [ uuidv1(), uuidv1() ]
+        }
+}
 
 describe('operator node', function () {
 
@@ -292,4 +305,259 @@ describe('operator node', function () {
             });
         })
     });
+
+    describe('mapTo', function() {
+
+        it('should map an observable to another msg with json payload', (done) => {
+
+            var topic = uuidv1();
+            var type = 'json';
+            var payload = createRandomValue(type);
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'mapTo', 
+                    mapTo_topic : topic,
+                    mapTo_payload : payload,
+                    mapTo_payloadType : type,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = of('foo');
+                global.set('observable', $observable); 
+
+                fromEvent(out,'input').subscribe( (msg) => {
+                    assert.equal(msg.topic, topic);
+                    assert(_.isEqual(msg.payload, payload));
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        })
+
+        it('should map an observable to another msg with str payload', (done) => {
+
+            var topic = uuidv1();
+            var type = 'str';
+            var payload = createRandomValue(type);
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'mapTo', 
+                    mapTo_topic : topic,
+                    mapTo_payload : payload,
+                    mapTo_payloadType : type,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = of('foo');
+                global.set('observable', $observable); 
+
+                fromEvent(out,'input').subscribe( (msg) => {
+                    assert.equal(msg.topic, topic);
+                    assert(_.isEqual(msg.payload, payload));
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        });
+
+        it('should map an observable to another msg with num payload', (done) => {
+
+            var topic = uuidv1();
+            var type = 'num';
+            var payload = createRandomValue(type);
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'mapTo', 
+                    mapTo_topic : topic,
+                    mapTo_payload : payload,
+                    mapTo_payloadType : type,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = of('foo');
+                global.set('observable', $observable); 
+
+                fromEvent(out,'input').subscribe( (msg) => {
+                    assert.equal(msg.topic, topic);
+                    assert(_.isEqual(msg.payload, payload));
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        })
+    });
+
+    describe('repeat', function() {
+
+        it('should repeat a msg several times', (done) => {
+
+            var repeats = Math.ceil(Math.random()*100);
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'repeat', 
+                    repeat_count : repeats,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: false, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = of('test');
+                global.set('observable', $observable); 
+
+                fromEvent(out,'input').pipe( skip(repeats-1) ).subscribe( (msg) => {
+                    //console.log(msg)
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        })
+
+        it('should throw an error on <repeat_count> not a number', (done) => {
+
+            var repeats = "test"
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'repeat', 
+                    repeat_count : repeats,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: false, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                const global = op.context().global;
+
+                var $observable = of('test');
+                global.set('observable', $observable); 
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+
+                setTimeout( () => {
+                    assert(op.error.called);
+                    done();
+                },100)
+            });
+        })
+    });
+
+    describe("retry", function() {
+
+        it('should retry on error', (done) => {
+
+            var retries = Math.ceil(Math.random()*100);
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'retry', 
+                    retry_number : retries,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = range(0, 2).pipe( mergeMap( (val) => {
+                    return val > 0 ? throwError('err') : of('succeed');
+                }));
+                global.set('observable', $observable); 
+
+                fromEvent(out,'input').pipe( scan( acc => acc + 1, 0), filter( val => val > retries)).subscribe( (val) => {
+                    assert.equal(val, retries + 1);
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        })
+
+        it('should throw error on negative number', (done) => {
+
+            var retries = -Math.ceil(Math.random()*100);
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'retry', 
+                    retry_number : retries,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                const global = op.context().global;
+
+                var $observable = of('test')
+                global.set('observable', $observable); 
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+
+                setTimeout( () => {
+                    assert(op.error.called);
+                    done();
+                },100)
+            });
+        })
+    })
 })
