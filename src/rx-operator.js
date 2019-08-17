@@ -138,7 +138,7 @@ module.exports = function (RED) {
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
                         if (!_.isNumber(config.repeat_count) || config.repeat_count <= 0) {
-                            node.error("count must be bigger than 0")
+                            node.error("count must be bigger than 0", msg)
                             break;
                         }
                         observableWrapper.register(
@@ -154,7 +154,7 @@ module.exports = function (RED) {
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
                         if (!_.isNumber(config.retry_number) || config.retry_number < 1) {
-                            node.error("number must be bigger than 0")
+                            node.error("number must be bigger than 0", msg)
                             break;
                         }
                         observableWrapper.register(
@@ -169,6 +169,10 @@ module.exports = function (RED) {
                 case "take":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
+                        if (!_.isNumber(config.take_count) || config.take_count < 1) {
+                            node.error("count must be bigger than 0", msg)
+                            break;
+                        }
                         observableWrapper.register(
                             $observable.pipe(
                                 take(config.take_count)

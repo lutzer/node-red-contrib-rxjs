@@ -11,7 +11,7 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-numberOfInputs">Number of Observables</label>
+        <label for="node-input-numberOfInputs">Number of observables</label>
         <input type="number" id="node-input-numberOfInputs">
     </div>
     <div class="form-row">
@@ -43,3 +43,52 @@
         }
     });
 </script>
+
+<script type="text/x-red" data-help-name="rx combine">
+    <p>Combines several observables with the selected operator.</p>
+
+    <h3>Properties</h3>
+    <dl class="message-properties">
+        <dt>Operator
+            <span class="property-type">select</span>
+        </dt>
+        <dd>Selects operator to combine nodes</dd>
+        <dt>Number of observables 
+            <span class="property-type">number</span></dt>
+        <dd>Selects the number of observables to be combined.</dd>
+    </dl>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">observable</span>
+        </dt>
+        <dd>The payload of the message needs to be an observable piped from an rx node</dd>
+        <dt>topic 
+            <span class="property-type">string</span></dt>
+        <dd>Needs to be <i>pipe</i></dd>
+        <dt>part 
+            <span class="property-type">number</span></dt>
+        <dd>Needs to be set to a number between 0 and numberOfInputs. 
+            Only when the node received all the inputs it will become active</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>pipe
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">observable</span></dt>
+                <dd>outputs the obseravble to subscribe to or to pipe</dd>
+            </dl>
+        </li>
+        <li>tap
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">any</span></dt>
+                <dd>Connect to debug node to tap into the rx chain.</dd>
+            </dl>
+        </li>
+    </ol>
+
+    <h3>Details</h3>
+    <p>More info about rxjs combine operators: <a href="https://www.learnrxjs.io/operators/combination/">www.learnrxjs.io</a></p>
+ </script>

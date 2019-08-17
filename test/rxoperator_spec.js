@@ -39,7 +39,7 @@ describe('operator node', function () {
     it('should pipe an observable', function(done) {
         var flow = [
             { id: 'n1', type: 'rx of', wires:[["op"]] },
-            { id: 'op', type: 'rx operator', operatorType: 'take', wires:[['out']] },
+            { id: 'op', type: 'rx operator', operatorType: 'timeInterval', wires:[['out']] },
             { id: 'out', type: 'helper' }
         ];
 
