@@ -2,5 +2,6 @@
 
 ## Unit Tests
 
-* install mocha with `npm install mocha -g`
+* install mocha globally with `npm install mocha -g`
+* install dependencies with `npm install`
 * run `npm test`

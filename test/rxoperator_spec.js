@@ -2,8 +2,10 @@ const _ = require('lodash');
 const assert = require('assert');
 const helper = require("node-red-node-test-helper");
 const uuidv1 = require('uuid/v1');
-const { fromEvent, throwError, of, timer, range } = require('rxjs');
-const { skip, first, scan, timeInterval, takeUntil, reduce, mergeMap, filter } = require('rxjs/operators');
+const { fromEvent, throwError, of, timer, range, combineLatest } = require('rxjs');
+const { skip, first, scan, timeInterval, 
+        takeUntil, reduce, mergeMap, filter, 
+        timeout, pairwise, catchError, startWith } = require('rxjs/operators');
 
 helper.init(require.resolve('node-red'));
 
@@ -53,7 +55,26 @@ describe('operator node', function () {
             })
             
         })
+    })
 
+    it('should throw an error if there is no observable piped', function(done) {
+        var flow = [
+            { id: 'op', type: 'rx operator', operatorType: 'timeInterval', wires:[['out']] },
+            { id: 'out', type: 'helper' }
+        ];
+
+        helper.load([ofNode, operatorNode, subscriberNode], flow, function() {
+            var out = helper.getNode("out");
+            var op = helper.getNode("op");
+
+            op.receive({ topic: 'pipe', payload: null});
+
+            setTimeout( () => {
+                assert(op.error.called);
+                done();
+            },100)
+
+        })
     })
 
     describe('bufferCount', function () {
@@ -560,4 +581,184 @@ describe('operator node', function () {
             });
         })
     })
+
+    describe("take", function() {
+
+        it('should take <take_count> values', (done) => {
+
+            var count = Math.ceil(Math.random()*100);
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'take', 
+                    take_count : count,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = range(0, 100);
+                global.set('observable', $observable); 
+
+                fromEvent(out,'input').pipe(
+                    timeout(10),
+                    catchError( (err) => {
+                        return of("timeout");
+                    }),
+                    pairwise()
+                ).subscribe( (val) => {
+                    if (val[1] === "timeout") {
+                        assert.equal(val[0], count - 1);
+                        done();
+                    }
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        })
+
+        it('should throw error on negative number', (done) => {
+
+            var count = -Math.ceil(Math.random()*100);
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'take', 
+                    take_count : count,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                const global = op.context().global;
+
+                var $observable = of('test')
+                global.set('observable', $observable); 
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+
+                setTimeout( () => {
+                    assert(op.error.called);
+                    done();
+                },100)
+            });
+        })
+
+    });
+
+    describe("takeUntil", function() {
+
+        it('should receive observables until argument is fired', (done) => {
+
+            var time = 50 + Math.ceil(Math.random()*200);
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'takeUntil',
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out'], ['complete']] },
+                { id: 'out', type: 'helper' },
+                { id: 'complete', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                var complete = helper.getNode('complete');
+                const global = op.context().global;
+
+                var $observable = timer(0, 10);
+                global.set('observable', $observable); 
+
+                var $stop = timer(time);
+                global.set('until-observable', $stop); 
+
+                combineLatest(fromEvent(out, 'input'), $stop, fromEvent(complete, 'input') ).subscribe( (val) => {
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+                op.receive({topic : 'until', payload : { observable : 'until-observable'}})
+            });
+        })
+
+        it('should not pipe observable when until is not received', (done) => {
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'takeUntil',
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var sub = helper.getNode('sub');
+                var complete = helper.getNode('complete');
+                const global = op.context().global;
+
+                var $observable = timer(0, 10);
+                global.set('observable', $observable); 
+
+                combineLatest( fromEvent(sub, 'input').pipe( startWith(null) ), timer(50).pipe( startWith(null) ), ).subscribe( (val) => {
+                    assert.equal(val[0], null)
+                    if (val[1] == 0)
+                        done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        })
+
+        it('should not pipe observable when pipe is not received', (done) => {
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'takeUntil',
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var sub = helper.getNode('sub');
+                var complete = helper.getNode('complete');
+                const global = op.context().global;
+
+                var $observable = timer(0, 10);
+                global.set('observable', $observable); 
+
+                combineLatest( fromEvent(sub, 'input').pipe( startWith(null) ), timer(50).pipe( startWith(null) ), ).subscribe( (val) => {
+                    assert.equal(val[0], null)
+                    if (val[1] == 0)
+                        done();
+                })
+
+                op.receive({topic : 'until', payload : { observable : 'observable'}})
+            });
+        })
+
+    });
 })
