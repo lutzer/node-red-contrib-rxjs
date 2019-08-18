@@ -32,3 +32,39 @@
         outputLabels: [ "pipe", "tap" ]
     });
 </script>
+
+
+<script type="text/x-red" data-help-name="rx timer">
+    <p>Creates a single observable that emits after a given interval, numbers in sequence every specified duration.</p>
+
+    <h3>Properties</h3>
+    <dl class="message-properties">
+        <dt>Initial Delay
+            <span class="property-type">number</span>
+        </dt>
+        <dd>Emit Msg after duration in ms</dd>
+        <dt>Repeat after
+            <span class="property-type">number</span>
+        </dt>
+        <dd>When bigger than 0, emit msg in intervals in ms</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>pipe
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">observable</span></dt>
+                <dd>outputs the obseravble to subscribe to or to pipe</dd>
+            </dl>
+        </li>
+        <li>tap
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">any</span></dt>
+                <dd>Connect to debug node to tap into the rx chain.</dd>
+            </dl>
+        </li>
+    </ol>
+
+    <h3>Details</h3>
+    <p>More info about rxjs timer operator: <a href="https://www.learnrxjs.io/operators/creation/timer.html">www.learnrxjs.io</a></p>
+ </script>
