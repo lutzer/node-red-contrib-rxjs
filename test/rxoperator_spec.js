@@ -3,7 +3,7 @@ const assert = require('assert');
 const helper = require("node-red-node-test-helper");
 const uuidv1 = require('uuid/v1');
 const { fromEvent, throwError, of, timer, range, combineLatest } = require('rxjs');
-const { skip, first, scan, timeInterval, 
+const { skip, first, scan, timeInterval, take, mapTo,
         takeUntil, reduce, mergeMap, filter, 
         timeout, pairwise, catchError, startWith } = require('rxjs/operators');
 
@@ -759,6 +759,77 @@ describe('operator node', function () {
                 op.receive({topic : 'until', payload : { observable : 'observable'}})
             });
         })
+
+    });
+
+    describe("timeInterval", function() {
+        it('should return the time interval between to calls', (done) => {
+
+            var interval = Math.random() * 100;
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'timeInterval',
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, wires: [['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = timer(0, interval);
+                global.set('observable', $observable); 
+
+                fromEvent(out, 'input').pipe( skip(1), take(1) ).subscribe( (msg) => {
+                    assert(Math.abs(msg.interval - interval) < 5);
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+
+        });
+
+        it('should return the original message', (done) => {
+
+            var topic = uuidv1();
+            var payload = uuidv1();
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'timeInterval',
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, wires: [['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = timer(0, 10).pipe( mapTo({ topic: topic, payload : payload }) )
+                global.set('observable', $observable); 
+
+                fromEvent(out, 'input').pipe( skip(1), take(1) ).subscribe( (msg) => {
+                    assert.equal(msg.topic, topic);
+                    assert.equal(msg.payload, payload);
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+
+        });
 
     });
 })

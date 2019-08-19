@@ -259,9 +259,11 @@ module.exports = function (RED) {
                             $observable.pipe(
                                 timeInterval(),
                                 map( (val) => {
-                                    const result = val.value;
-                                    result.interval = val.interval;
-                                    return result;
+                                    return {
+                                        topic : _.has(val.value, 'topic') ? val.value.topic : 'interval',
+                                        payload : _.has(val.value, 'payload') ? val.value.payload : val.value,
+                                        interval: val.interval
+                                    };
                                 })
                             )
                         )

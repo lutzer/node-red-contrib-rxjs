@@ -19,12 +19,12 @@
             return this.name || "rx observer";
         },
         inputLabels: [ 'next' ],
-        outputLabels: [ "pipe", "onSubscribed" ]
+        outputLabels: [ "pipe", "subscribed" ]
     });
 </script>
 
 <script type="text/x-red" data-help-name="rx observer">
-    <p>Creates a single observable emitting a topic and payload.</p>
+    <p>Creates a single observable that emits messages that are send to its input. Fires event on subscription.</p>
 
     <h3>Inputs</h3>
     <dl class="message-properties">
@@ -45,7 +45,7 @@
                 <dd>outputs the obseravble to subscribe to or to pipe</dd>
             </dl>
         </li>
-        <li>onSubscribed
+        <li>subscribed
             <dl class="message-properties">
                 <dt>payload <span class="property-type">any</span></dt>
                 <dd>Connect to debug node to tap into the rx chain.</dd>
