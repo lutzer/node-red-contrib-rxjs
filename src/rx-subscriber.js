@@ -39,18 +39,18 @@ module.exports = function (RED) {
                 next : (msg) => {
                     if (_.isArray(msg) && config.bundle) {
                         var bundle = msg.map( (val) => val.payload );
-                        node.send([{ topic: msg[0].topic, payload: bundle }])
+                        node.send([{ topic: msg[0].topic, payload: bundle }, null, null])
                     } else {
-                        node.send([msg, null])
+                        node.send([msg, null, null])
                     }
                 },
                 complete : () => {
                     showState("completed");
-                    node.send([null, { topic: "completed" }])
+                    node.send([null, { topic: "completed" }, null])
                 },
                 error : (err) => {
                     showState("error");
-                    node.error(err.message, err);
+                    node.send([null, null, { topic: "error", payload: err }])
                 }
 
             });

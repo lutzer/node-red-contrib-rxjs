@@ -25,12 +25,12 @@
             bundle : { value: false }
         },
         inputs:1,
-        outputs:2,
+        outputs:3,
         icon: "file.png",
         label: function() {
             return this.name || "rx subscriber";
         },
         inputLabels: [ "input" ],
-        outputLabels: [ "next", "completed" ]
+        outputLabels: [ "next", "completed", "error" ]
     });
 </script>

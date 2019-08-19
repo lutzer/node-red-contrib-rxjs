@@ -10,18 +10,25 @@ module.exports = function (RED) {
         
         var observableWrapper = new NodeRedObservable(node);
 
-        var subject = new Subject();
+        var $subject = new Subject();
 
         observableWrapper.register(
-            subject.asObservable()
+            $subject.asObservable()
         );
 
+        observableWrapper.on('tap', (msg) => {
+            node.send([null, msg]);
+        });
+
         node.on('input', (msg) => {
-            subject.next(msg);
+            if (msg.topic === 'error')
+                $subject.error(msg);
+            else    
+                $subject.next(msg);
         })
 
         function onLoaded() {
-            node.send([observableWrapper.pipeMessage]);
+            node.send([observableWrapper.pipeMessage, null]);
         }
 
         setTimeout( () => onLoaded() ,ON_LOADED_TIMEOUT);
