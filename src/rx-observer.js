@@ -1,6 +1,5 @@
 const _ = require('lodash');
-const { Subject, throwError } = require('rxjs');
-const { switchMap } = require('rxjs/operators');
+const { Observable } = require('rxjs');
 const { ON_LOADED_TIMEOUT, NodeRedObservable, convertNodeRedType } = require('./common.js');
 
 module.exports = function (RED) {
@@ -15,19 +14,27 @@ module.exports = function (RED) {
         
         var observableWrapper = new NodeRedObservable(node);
 
-        var $subject = new Subject();
-
-        
-        observableWrapper.register(
-            $subject.pipe( switchMap( (msg) => throwError(msg)))
-        );
-
-        node.on('input', (msg) => {
-            $subject.next(msg);
+        var observer = null;
+        var $observable = Observable.create( (obs) => {
+            observer = obs;
+            node.send([null, { topic: "subscribed" } ])
         })
 
+        observableWrapper.register(
+            $observable
+        );
+
+        node.on('input', function (msg) {
+            if (msg.topic === 'error')
+                observer.error(msg);
+            else if (msg.topic === 'complete')
+                observer.complete();
+            else
+			    observer.next(msg);
+		});
+
         function onLoaded() {
-            node.send([observableWrapper.pipeMessage]);
+            node.send([observableWrapper.pipeMessage, null]);
         }
 
         setTimeout( () => onLoaded() ,ON_LOADED_TIMEOUT);
@@ -36,5 +43,5 @@ module.exports = function (RED) {
 			observableWrapper.remove();
 		});
 	}
-	RED.nodes.registerType("rx throw", RxNode);
+	RED.nodes.registerType("rx observer", RxNode);
 };

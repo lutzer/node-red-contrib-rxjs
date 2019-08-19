@@ -15,10 +15,6 @@ module.exports = function (RED) {
         
         var observableWrapper = new NodeRedObservable(node);
 
-        observableWrapper.on('tap', (msg) => {
-            node.send([null, msg]);
-        });
-
         observableWrapper.register(
             timer(config.initialDelay, config.period > 0 ? config.period : undefined).pipe( 
                 map( (val) => {
@@ -28,7 +24,7 @@ module.exports = function (RED) {
         );
 
         function onLoaded() {
-            node.send([observableWrapper.pipeMessage, null]);
+            node.send([observableWrapper.pipeMessage]);
         }
 
         setTimeout( () => onLoaded() ,ON_LOADED_TIMEOUT);

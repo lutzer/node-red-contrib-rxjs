@@ -13,11 +13,10 @@
       "rx of": "src/rx-of.js",
       "rx timer": "src/rx-timer.js",
       "rx range": "src/rx-range.js",
-      "rx fromMsg": "src/rx-fromMsg.js",
       "rx subscribe": "src/rx-subscriber.js",
       "rx operator": "src/rx-operator.js",
       "rx combine": "src/rx-combine.js",
-      "rx throw": "src/rx-throw.js"
+      "rx observer": "src/rx-observer.js"
     }
   },
   "dependencies": {

@@ -14,10 +14,6 @@ module.exports = function (RED) {
         
         var observableWrapper = new NodeRedObservable(node);
 
-        observableWrapper.on('tap', (msg) => {
-            node.send([null, msg]);
-        });
-
         var payload = convertNodeRedType(config.payload, config.payloadType)
 
         observableWrapper.register(
@@ -25,7 +21,7 @@ module.exports = function (RED) {
         );
 
         function onLoaded() {
-            node.send([observableWrapper.pipeMessage, null]);
+            node.send([observableWrapper.pipeMessage]);
         }
 
         setTimeout( () => onLoaded() ,ON_LOADED_TIMEOUT);

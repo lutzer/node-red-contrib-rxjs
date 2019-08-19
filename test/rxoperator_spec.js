@@ -596,7 +596,7 @@ describe('operator node', function () {
                     take_count : count,
                     wires:[['sub']] 
                 },
-                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: true, wires:[['out']] },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, bundle: false, wires:[['out']] },
                 { id: 'out', type: 'helper' }
             ];
 

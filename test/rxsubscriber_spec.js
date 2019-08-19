@@ -2,7 +2,7 @@ const _ = require('lodash');
 const assert = require('assert');
 const helper = require("node-red-node-test-helper");
 const uuidv1 = require('uuid/v1');
-const { fromEvent, zip } = require('rxjs');
+const { fromEvent, zip, throwError } = require('rxjs');
 const { skip } = require('rxjs/operators');
 
 helper.init(require.resolve('node-red'));
@@ -122,6 +122,37 @@ describe('subscriber node', function () {
         })
     });
 
+    it('should emit error when error thrown', function(done) {
+        
+        const errorString = uuidv1();
+        
+        var flow = [
+            { id: 'subscriber', type: 'rx subscriber', auto_subscribe: true, wires:[ ['out'] ,['complete'], ['error'] ] },
+            { id: 'out', type: 'helper' },
+            { id: 'complete', type: 'helper' },
+            { id: 'error', type: 'helper' }
+        ];
+
+
+        helper.load([timerNode, subscriberNode], flow, function() {
+            var subscriber = helper.getNode("subscriber");
+            var error = helper.getNode("error");
+            const global = subscriber.context().global;
+
+            var $observable = throwError(errorString);
+            global.set('observable', $observable); 
+            
+            fromEvent(error, 'input').subscribe( (msg) => {
+                assert.equal(msg.payload, errorString);
+                done();
+            });
+
+            setTimeout( () => {
+                subscriber.receive({ topic: "pipe", payload : { observable : 'observable' }})
+            },100)
+        })
+    });
+
     it('should be able to re subscribe to an observable', function(done) {
         var flow = [
             { id: 'n1', type: 'rx of', wires:[["subscriber"]]},
@@ -163,7 +194,6 @@ describe('subscriber node', function () {
                 assert(_.isArray(msg.payload))
                 done();
             })
-            
         })
     });
 })

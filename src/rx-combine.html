@@ -30,13 +30,13 @@
             operatorType : { value: "none" }
         },
         inputs:1,
-        outputs:2,
+        outputs:1,
         icon: "file.png",
         label: function() {
             return this.name || `rx ${this.operatorType === "none" ? "combine" : this.operatorType}`;
         },
         inputLabels: [ "input" ]  ,
-        outputLabels: [ "pipe", "tap" ],
+        outputLabels: [ "pipe" ],
         oneditsave: function () {
             var type = $('#node-input-operatorType').val();
             this.operatorType = type || "none";
@@ -79,12 +79,6 @@
             <dl class="message-properties">
                 <dt>payload <span class="property-type">observable</span></dt>
                 <dd>outputs the obseravble to subscribe to or to pipe</dd>
-            </dl>
-        </li>
-        <li>tap
-            <dl class="message-properties">
-                <dt>payload <span class="property-type">any</span></dt>
-                <dd>Connect to debug node to tap into the rx chain.</dd>
             </dl>
         </li>
     </ol>

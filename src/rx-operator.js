@@ -172,7 +172,7 @@ module.exports = function (RED) {
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
                         let count = _.toNumber(config.take_count);
-                        if (_.isNan(count) || count < 1) {
+                        if (_.isNaN(count) || count < 1) {
                             node.error("count must be bigger than 0", msg)
                             break;
                         }

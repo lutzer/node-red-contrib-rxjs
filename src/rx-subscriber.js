@@ -50,7 +50,10 @@ module.exports = function (RED) {
                 },
                 error : (err) => {
                     showState("error");
-                    node.send([null, null, { topic: "error", payload: err }])
+                    if (!_.has(err, 'topic'))
+                        node.send([null, null, { topic: 'error', payload: err }])
+                    else
+                        node.send([null, null, err])
                 }
 
             });
