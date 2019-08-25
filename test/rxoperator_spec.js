@@ -787,7 +787,7 @@ describe('operator node', function () {
                 global.set('observable', $observable); 
 
                 fromEvent(out, 'input').pipe( skip(1), take(1) ).subscribe( (msg) => {
-                    assert(Math.abs(msg.interval - interval) < 5);
+                    assert(Math.abs(msg.interval - interval) < 10);
                     done();
                 })
 
@@ -831,5 +831,83 @@ describe('operator node', function () {
 
         });
 
+    });
+
+    describe("timeout", () => {
+        it('should throw error on timeout', (done) => {
+
+            var time = Math.random() * 100;
+
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'timeout',
+                    timeout: time,
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, wires: [['out'], [null], ["error"]] },
+                { id: 'out', type: 'helper' },
+                { id: 'error', type: 'helper' },
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var error = helper.getNode('error');
+                const global = op.context().global;
+
+                var $observable = timer(1000);
+                global.set('observable', $observable); 
+
+                fromEvent(error, 'input').subscribe( (msg) => {
+                    assert.equal(msg.topic, "error");
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        });
+    });
+
+    describe("scan", () => {
+
+        it('should accept a seed and scan function', (done) => {
+
+            var type = _.sample(["str","num","json"]);
+            var seed = createRandomValue(type);
+        
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'scan',
+                    scan_seed: seed,
+                    scan_seedType: type,
+                    scan_func: "return acc + msg",
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, wires: [['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = range(0,10);
+                global.set('observable', $observable); 
+
+                fromEvent(out, 'input').pipe( skip(9) ).subscribe( (msg) => {
+                    var result = _.range(0,10).reduce( (acc, val) => {
+                        return acc + val;
+                    }, seed)
+                    assert(_.isEqual(result, msg.payload));
+                    done();
+                })
+
+                op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+            });
+        });
     });
 })
