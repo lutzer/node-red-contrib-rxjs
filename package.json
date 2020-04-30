@@ -1,12 +1,22 @@
 {
   "name": "node-red-contrib-rxjs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "mocha \"test/**/*_spec.js\""
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lutzer/node-red-contrib-rxjs.git"
+  },
+  "keywords": [
+    "node-red",
+    "rxjs",
+    "rx",
+    "observables"
+  ],
+  "author": "Lutz Reiter",
   "license": "ISC",
   "node-red": {
     "nodes": {
