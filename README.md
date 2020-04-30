@@ -2,7 +2,7 @@
 
 Implementation of rxjs in node red. 
 
-*This node is in an experimental state and it does not include all the operators yet. If people find this useful, I will continue developping it.*
+*This node is in an experimental state and it does not include all the operators yet. If people find this useful, I will continue developing it.*
 
 ## Examples
 
