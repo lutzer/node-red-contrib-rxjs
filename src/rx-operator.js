@@ -116,6 +116,27 @@ module.exports = function (RED) {
                         showState("piped");
                     }
                     break;
+                case "map":
+                    if (msg.topic === 'pipe') {
+                        const $observable = globalContext.get(msg.payload.observable)
+                        const mapFunc = new Function('msg', config.map_func);
+                        observableWrapper.register(
+                            $observable.pipe(
+                                map( (msg) => {
+                                    return mapFunc(msg);
+                                }),
+                                map( (val) => {
+                                    if (_.has(val, 'payload'))
+                                        return val;
+                                    else
+                                        return { payload : val }
+                                })
+                            )
+                        )
+                        sendPipeMessage()
+                        showState("piped");
+                    }
+                    break;
                 case "mapTo":
                     if (msg.topic === 'pipe') {
                         try {

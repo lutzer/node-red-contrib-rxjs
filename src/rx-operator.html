@@ -15,6 +15,7 @@
             <option value="distinctUntilKeyChanged">distinctUntilKeyChanged</option>
             <option value="filter">filter</option>
             <option value="mapTo">mapTo</option>
+            <option value="map">map</option>
             <option value="repeat">repeat</option>
             <option value="retry">retry</option>
             <option value="take">take</option>
@@ -59,6 +60,13 @@
         <div class="form-row">
             <label></label>
             <span style="width: 70%">Compare nested values with "payload.x"</span>
+        </div>
+    </div>
+
+    <div class="detail-view" id="map">
+        <div class="form-row">
+            <label for="node-input-map_func">Expression</label>
+            <input type="text" id="node-input-map_func" style="width: 70%" placeholder="Mapping function">
         </div>
     </div>
 
@@ -163,6 +171,7 @@
             mapTo_topic: { value: "foo"},
             mapTo_payload: { value: "bar", validate: RED.validators.typedInput("mapTo_payloadType") },
             mapTo_payloadType: { value : "str"},
+            map_func: { value: 'return msg.payload + 1'},
             take_count: { value: 1, validate: RED.validators.number()},
             filter_func : { value : "return msg.payload > 0"},
             scan_seed : { value: 0, validate: RED.validators.typedInput("scan_seedType") },
@@ -202,6 +211,9 @@
                 types:[ "str", "num", "json" ],
                 typeField: $("#node-input-mapTo_payloadType"),
             });
+
+            //map inputs
+            $('#node-input-map_func').typedInput({ types:[ inputTypes.function ]});
 
             // catch inputs
             $('#node-input-catch_func').typedInput({ types:[ inputTypes.function ]});

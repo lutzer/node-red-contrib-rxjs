@@ -1,5 +1,6 @@
 # node-red-contrib-rxjs
 
+Implementation of rxjs in node red. It does not include all the operators yet. 
 
 ## Examples
 

@@ -910,4 +910,44 @@ describe('operator node', function () {
             });
         });
     });
+
+    describe("map", () => {
+
+        it('should accept a map function', (done) => {
+
+            var type = _.sample(["str","num","json"]);
+            var input = createRandomValue(type);
+        
+            var flow = [
+                { 
+                    id: 'op', 
+                    type: 'rx operator', 
+                    operatorType: 'map',
+                    map_func: 'return msg.payload + 1',
+                    wires:[['sub']] 
+                },
+                { id: 'sub', type: 'rx subscriber', auto_subscribe : true, wires: [['out']] },
+                { id: 'out', type: 'helper' }
+            ];
+
+            helper.load([operatorNode, subscriberNode], flow, function() {
+                var op = helper.getNode('op');
+                var out = helper.getNode('out');
+                const global = op.context().global;
+
+                var $observable = of({ payload: input });
+                global.set('observable', $observable); 
+
+                fromEvent(out, 'input').subscribe( (msg) => {
+                    assert(_.isEqual(input + 1, msg.payload));
+                    done();
+                })
+
+                setTimeout(() => {
+                    op.receive({topic : 'pipe', payload : { observable : 'observable'}})
+                },10)
+                
+            });
+        });
+    });
 })
