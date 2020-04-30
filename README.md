@@ -1,6 +1,8 @@
 # node-red-contrib-rxjs
 
-Implementation of rxjs in node red. This node is in an experimental state and it does not include all the operators yet. If people find this useful, I will continue developping it. 
+Implementation of rxjs in node red. 
+
+*This node is in an experimental state and it does not include all the operators yet. If people find this useful, I will continue developping it.*
 
 ## Examples
 
