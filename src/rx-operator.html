@@ -234,3 +234,33 @@
         }
     });
 </script>
+
+<script type="text/x-red" data-help-name="rx operator">
+    <p>Pipes an observable to the specified operator.</p>
+
+    <h3>Properties</h3>
+    <dl class="message-properties">
+        <dt>Operator
+            <span class="property-type">string</span>
+        </dt>
+    </dl>
+
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+        <li>pipe
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">observable</span></dt>
+                <dd>outputs the obseravble to subscribe to or to pipe</dd>
+            </dl>
+        </li>
+        <li>tap
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">observable</span></dt>
+                <dd>taps into the observable stream after applying this opeartor</dd>
+            </dl>
+        </li>
+    </ol>
+
+    <h3>Details</h3>
+    <p>More infos about rxjs operators: <a href="https://www.learnrxjs.io/operators/">www.learnrxjs.io</a></p>
+ </script>

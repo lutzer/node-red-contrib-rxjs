@@ -119,7 +119,12 @@ module.exports = function (RED) {
                 case "map":
                     if (msg.topic === 'pipe') {
                         const $observable = globalContext.get(msg.payload.observable)
-                        const mapFunc = new Function('msg', config.map_func);
+                        try {
+                            var mapFunc = new Function('msg', config.map_func);
+                        } catch (err) {
+                            node.error(err, msg);
+                            break;
+                        }
                         observableWrapper.register(
                             $observable.pipe(
                                 map( (msg) => {
