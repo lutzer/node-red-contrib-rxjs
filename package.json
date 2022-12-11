@@ -34,8 +34,8 @@
     "rxjs": "^6.5.2"
   },
   "devDependencies": {
-    "node-red": "^0.20.7",
-    "node-red-node-test-helper": "^0.2.3",
+    "node-red": "^3.0.2",
+    "node-red-node-test-helper": "^0.3.0",
     "uuid": "^3.3.2"
   }
 }
